@@ -23,9 +23,9 @@ int main(void)
 		char name [7];
 		string str = to_string(iter);
 		for (int i = 0; i < str.length(); i++)
-			str[2 - i] = name[i];
+			name[i]= str[2 - i];
 		for (int i = 0; i < 3 - str.length(); i++)
-			str[i] = '0';
+			name[i] = '0';
 
 		write_file(name, &domain.particle_list);
 

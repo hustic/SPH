@@ -14,47 +14,7 @@ SPH_main::SPH_main()
 {
 	SPH_particle::main_data = this;
 }
-double SPH_main::cubic_spline(double r[2])
-{
-	double q = sqrt(r[0] * r[0] + r[1] * r[1]) / h;
-	if (q >= 0 && q <= 1)
-	{
-		return 10 * (1 - 1.5 * q * q + 0.75 * pow(q, 3)) / (7 * M_PI * h * h);
-	}
-	else if (q > 1 and q <= 2)
-	{
-		return 10 * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
-	}
-	else { return 0; }
-}
 
-double SPH_main::cubic_spline_first_derivative(double r[2])
-{
-	double q = sqrt(r[0] * r[0] + r[1] * r[1]) / h;
-	if (q >= 0 && q <= 1)
-	{
-		return 10 * (-3 * q + 2.25 * q * q) / (7 * M_PI * pow(h, 3));
-	}
-	else if (q > 1 and q <= 2)
-	{
-		return 10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
-	}
-	else { return 0; }
-}
-
-void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part)		//updates acceleration and rate of change of density
-{
-	double mass = part->rho * dx * dx;
-	double vij[2], eij[2];
-	double dwdr = cubic_spline_first_derivative(r);
-	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
-	for (int n = 0; n < 2; n++)
-	{
-		vij[n] = part->v[n] - other_part->v[n];
-		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
-		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]) + g[n];
-	}
-}
 
 double SPH_main::cubic_spline(double r[2])
 {
@@ -103,8 +63,8 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	SPH_particle* other_part;
 	double dist;			//distance between particles
 	double dn[2];			//vector from 1st to 2nd particle
-	double numerator;
-	double denominator;
+	double numerator = 0.0;
+	double denominator = 0.0;
 
 	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
 		if (i >= 0 && i < max_list[0])
