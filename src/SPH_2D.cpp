@@ -42,7 +42,7 @@ double SPH_main::cubic_spline_first_derivative(double r[2])
 	else { return 0; }
 }
 
-void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part)		//updates acceleration and rate of change of density
+void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part)		//updates acceleration and rate of change of density of a particle
 {	
 	double mass = part->rho * dx * dx;
 	double vij[2], eij[2];
@@ -56,6 +56,42 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 	}
 }
 
+void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
+{
+	SPH_particle* other_part;
+	double dist;			//distance between particles
+	double dn[2];			//vector from 1st to 2nd particle
+	double numerator;
+	double denominator;
+
+	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
+		if (i >= 0 && i < max_list[0])
+			for (int j = part->list_num[1] - 1; j <= part->list_num[1] + 1; j++)
+				if (j >= 0 && j < max_list[1])
+				{
+					for (unsigned int cnt = 0; cnt < search_grid[i][j].size(); cnt++)
+					{
+						other_part = search_grid[i][j][cnt];
+
+						if (part != other_part)					//stops particle interacting with itself
+						{
+							//Calculates the distance between potential neighbours
+							for (int n = 0; n < 2; n++)
+								dn[n] = part->x[n] - other_part->x[n];
+
+							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
+
+							if (dist < 2. * h)					//only particle within 2h
+							{
+								numerator += cubic_spline(dn);
+								denominator += numerator / other_part->rho;
+							}
+						}
+					}
+				}
+	part->rho = numerator / denominator;
+}
+
 void SPH_main::set_values(void)
 {
 	min_x[0] = 0.0;
@@ -65,6 +101,7 @@ void SPH_main::set_values(void)
 	max_x[1] = 1.0;
 
 	dx = 0.02;
+	c0 = 20;
 
 	mu = 0.001;
 	g[0] = 0.0;
@@ -72,6 +109,10 @@ void SPH_main::set_values(void)
 	
 	h_fac = 1.3;
 	h = dx*h_fac;
+	dt = 0.1 * h / c0;
+
+	gamma = 7.0;
+	B = c0 * c0 * rho0 / gamma;
 }
 
 void SPH_main::initialise_grid(void)
@@ -152,11 +193,17 @@ void SPH_main::neighbour_iterate(SPH_particle *part)					//iterates over all par
 
 							if (dist < 2.*h)					//only particle within 2h
 							{
-								//TODO: all the interactions between the particles
-								
-								cout << "dn: " << dn[0] << " " << dn[1] << endl;		//Should be removed from the code - simply here for you to see that it is working
+								update_gradients(dn, part, other_part);
 							}
 						}
 					}
 				}
+	for (int k = 0; k < 2; k++)
+	{
+		part->x[k] = part->x[k] + dt * part->v[k];
+		part->v[k] = part->v[k] + dt * part->a[k];
+	}
+	part->rho = part->rho + part->D;
+	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+	
 }

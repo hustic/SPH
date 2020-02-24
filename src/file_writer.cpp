@@ -102,7 +102,7 @@ double get_pressure(SPH_particle p) {
 }
 
 
-int write_file(const char *filename,
+int write_file(char *filename,
 	       std::vector<SPH_particle> *particle_list) {
 
   /*

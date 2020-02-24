@@ -1,5 +1,6 @@
 #include "SPH_2D.h"
 #include "file_writer.h"
+#include <string>
 
 SPH_main domain;
 
@@ -12,9 +13,26 @@ int main(void)
 
 	domain.allocate_to_grid();									//needs to be called for each time step
 
-	domain.neighbour_iterate(&domain.particle_list[100]);		//finding all the neighbours of the 100th particle in the list - in reality the simulation loop will need to do the calculations for the neighbours of every particle
 
-	write_file("example.vtp", &domain.particle_list);
+	for (int iter = 1; iter < 30; iter++) {
+		domain.neighbour_iterate(&domain.particle_list[100]);		//finding all the neighbours of the 100th particle in the list - in reality the simulation loop will need to do the calculations for the neighbours of every particle
+		if (iter % 10 == 0) {
+			domain.density_field_smoothing(&domain.particle_list[100]);
+		}
+		
+		char name [7];
+		string str = to_string(iter);
+		for (int i = 0; i < str.length(); i++)
+			str[2 - i] = name[i];
+		for (int i = 0; i < 3 - str.length(); i++)
+			str[i] = '0';
+
+		write_file(name, &domain.particle_list);
+
+	}
+	
+
+	
 	
 	return 0;
 }

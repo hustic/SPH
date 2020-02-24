@@ -30,6 +30,7 @@ public:
 	double cubic_spline(double r[2]);
 	double cubic_spline_first_derivative(double r[2]);
 	void update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part);
+	void density_field_smoothing(SPH_particle* part);
 
 	void set_values(void);
 	void initialise_grid(void);
@@ -43,9 +44,15 @@ public:
 	double h;								//smoothing length
 	double h_fac;
 	double dx;								//particle initial spacing
+	double c0;								//speed of sound
+
+	double dt;								//time step
 
 	double g[2];							//gravity constant
 	double mu;								//viscosity
+	double rho0;							//initial density
+	double B;
+	double gamma;
 
 	double min_x[2], max_x[2];				//dimensions of simulation region
 
