@@ -25,7 +25,7 @@ double SPH_main::cubic_spline(double r[2])
 	}
 	else if (q > 1 and q <= 2)
 	{
-		return 10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
+		return -10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
 	}
 	else { return 0; }
 }
@@ -49,13 +49,13 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 	double mass = part->rho * dx * dx;
 	double vij[2], eij[2];
 	double dwdr = cubic_spline_first_derivative(r);
-	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 	for (int n = 0; n < 2; n++)
 	{
 		vij[n] = part->v[n] - other_part->v[n];
 		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
-		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]) + g[n];
+		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
+	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 }
 
 void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
@@ -108,7 +108,7 @@ void SPH_main::set_values(void)
 	mu = 0.001;
 	g[0] = 0.0;
 	g[1] = 9.81;
-	
+	rho0 = 1000;
 
 	h_fac = 1.3;
 
@@ -147,7 +147,14 @@ void SPH_main::place_points(double* min, double* max)
 		while (x[1] <= max[1])
 		{
 			for (int i = 0; i < 2; i++)
+			{
 				particle.x[i] = x[i];
+				particle.a[i] = 0.0 + g[i];
+				particle.v[i] = 0.0;
+			}
+			particle.D = 0.0;
+			particle.rho = rho0;
+			particle.P = 0.0;
 
 			particle.calc_index();
 
@@ -187,6 +194,12 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 	double rho0 = 1000;
 	double B = (rho0 * c0 * c0) / y;
 
+	for (int n = 0; n < 2; n++)
+	{
+		part->a[n] = 0.0 + g[n];
+	}
+	part->D = 0.0;
+
 	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
 		if (i >= 0 && i < max_list[0])
 			for (int j = part->list_num[1] - 1; j <= part->list_num[1] + 1; j++)
@@ -204,15 +217,14 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 
 							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
 							if (dist < 2. * h)					//only particle within 2h
-							{
-
 								update_gradients(dn, part, other_part);
-
-							}
 						}
 					}
 				}
+}
 
+void SPH_main::update_particle(SPH_particle* part) 
+{
 	for (int k = 0; k < 2; k++)
 	{
 		part->x[k] = part->x[k] + dt * part->v[k];
@@ -220,6 +232,4 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 	}
 	part->rho = part->rho + part->D;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
-	
-
 }

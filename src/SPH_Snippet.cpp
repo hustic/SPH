@@ -16,12 +16,23 @@ int main(void)
 
 	domain.allocate_to_grid();									//needs to be called for each time step
 
+	stringstream name;
+	name << "initial_configuration.vtp";
 
-	for (int iter = 0; iter < 30; iter++) {
-		domain.neighbour_iterate(&domain.particle_list[100]);		//finding all the neighbours of the 100th particle in the list - in reality the simulation loop will need to do the calculations for the neighbours of every particle
+
+	write_file(name.str().c_str(), &domain.particle_list);
+
+
+	for (int iter = 0; iter < 10; iter++) {
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.neighbour_iterate(&domain.particle_list[i]);
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.update_particle(&domain.particle_list[i]);
 		if (iter % 10 == 0) {
-			domain.density_field_smoothing(&domain.particle_list[100]);
+			for (int i = 0; i < domain.particle_list.size(); i++)
+				domain.density_field_smoothing(&domain.particle_list[i]);
 		}
+		
 		
 		stringstream name;
         name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";

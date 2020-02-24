@@ -14,7 +14,8 @@ class SPH_particle
 public:
 	double x[2], v[2];				//position and velocity
 	double rho, P;					//density and pressure
-	double a[2], D;					//acceleration and rate of change of density
+	double a[2];					//acceleration
+	double D;						//rate of change of density
 
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
@@ -41,6 +42,7 @@ public:
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 
 	void neighbour_iterate(SPH_particle* part);
+	void update_particle(SPH_particle* part);
 
 	double h;								//smoothing length
 	double h_fac;
