@@ -1,16 +1,57 @@
-#include "SPH_2D.h"
+﻿#include "SPH_2D.h"
 
-SPH_main *SPH_particle::main_data;
+SPH_main* SPH_particle::main_data; 
 
 void SPH_particle::calc_index(void)
 {
 	for (int i = 0; i < 2; i++)
-		list_num[i] = int((x[i] - main_data->min_x[i]) / (2.0*main_data->h));
+		list_num[i] = int((x[i] - main_data->min_x[i]) / (2.0 * main_data->h));
 }
 
 SPH_main::SPH_main()
 {
 	SPH_particle::main_data = this;
+}
+double SPH_main::cubic_spline(double r[2])
+{
+	double q = sqrt(r[0] * r[0] + r[1] * r[1]) / h;
+	if (q >= 0 && q <= 1)
+	{
+		return 10 * (1 - 1.5 * q * q + 0.75 * pow(q, 3)) / (7 * M_PI * h * h);
+	}
+	else if (q > 1 and q <= 2)
+	{
+		return 10 * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
+	}
+	else { return 0; }
+}
+
+double SPH_main::cubic_spline_first_derivative(double r[2])
+{
+	double q = sqrt(r[0] * r[0] + r[1] * r[1]) / h;
+	if (q >= 0 && q <= 1)
+	{
+		return 10 * (-3 * q + 2.25 * q * q) / (7 * M_PI * pow(h, 3));
+	}
+	else if (q > 1 and q <= 2)
+	{
+		return 10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
+	}
+	else { return 0; }
+}
+
+void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part)		//updates acceleration and rate of change of density
+{
+	double mass = part->rho * dx * dx;
+	double vij[2], eij[2];
+	double dwdr = cubic_spline_first_derivative(r);
+	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
+	for (int n = 0; n < 2; n++)
+	{
+		vij[n] = part->v[n] - other_part->v[n];
+		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
+		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]) + g[n];
+	}
 }
 
 void SPH_main::set_values(void)
@@ -22,28 +63,28 @@ void SPH_main::set_values(void)
 	max_x[1] = 1.0;
 
 	dx = 0.02;
-	
+
 	h_fac = 1.3;
-	h = dx*h_fac;
+	h = dx * h_fac;
 }
 
 void SPH_main::initialise_grid(void)
 {
 	for (int i = 0; i < 2; i++)
 	{
-		min_x[i] -= 2.0*h;
-		max_x[i] += 2.0*h;												//add buffer for virtual wall particles
+		min_x[i] -= 2.0 * h;
+		max_x[i] += 2.0 * h; //add buffer for virtual wall particles
 
-		max_list[i] = int((max_x[i] - min_x[i]) / (2.0*h) + 1.0);
+		max_list[i] = int((max_x[i] - min_x[i]) / (2.0 * h) + 1.0);
 	}
 
 	search_grid.resize(max_list[0]);
-	for (int i=0;i<max_list[0];i++)
+	for (int i = 0; i < max_list[0]; i++)
 		search_grid[i].resize(max_list[1]);
 }
 
 
-void SPH_main::place_points(double *min, double *max)
+void SPH_main::place_points(double* min, double* max)
 {
 	double x[2] = { min[0], min[1] };
 	SPH_particle particle;
@@ -80,14 +121,22 @@ void SPH_main::allocate_to_grid(void)				//needs to be called each time that all
 }
 
 
-void SPH_main::neighbour_iterate(SPH_particle *part)					//iterates over all particles within 2h of part - can be made more efficient using a stencil and realising that all interactions are symmetric
+
+void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all particles within 2h of part - can be made more efficient using a stencil and realising that all interactions are symmetric
 {
-	SPH_particle *other_part;
+	SPH_particle* other_part;
 	double dist;			//distance between particles
 	double dn[2];			//vector from 1st to 2nd particle
+	double tmax = 30;
+	double t = 0;
+	double dt = 0.04;
+	int y = 7;
+	int c0 = 20;
+	double rho0 = 1000;
+	double B = (rho0 * c0 * c0) / y;
 
-	for (int i= part->list_num[0]-1;i<= part->list_num[0] + 1;i++)
-		if (i>=0 && i<max_list[0])
+	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
+		if (i >= 0 && i < max_list[0])
 			for (int j = part->list_num[1] - 1; j <= part->list_num[1] + 1; j++)
 				if (j >= 0 && j < max_list[1])
 				{
@@ -102,14 +151,27 @@ void SPH_main::neighbour_iterate(SPH_particle *part)					//iterates over all par
 								dn[n] = part->x[n] - other_part->x[n];
 
 							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
-
-							if (dist < 2.*h)					//only particle within 2h
+							if (dist < 2. * h)					//only particle within 2h
 							{
-								//TODO: all the interactions between the particles
 								
 								cout << "dn: " << dn[0] << " " << dn[1] << endl;		//Should be removed from the code - simply here for you to see that it is working
 							}
 						}
 					}
 				}
+
+
+	//TODO: all the interactions between the particles
+	while (t < tmax)
+	{
+		//if()
+		for (int k = 0; k < 2; k++)
+		{
+			part->v[k] = part->v[k] + dt * part->a[k];
+			part->x[k] = part->x[k] + dt * part->v[k];
+		}
+		part->rho = part->rho * part->D;
+		part->P = B *(pow((part->rho/rho0),y)-1) ;
+		t = t + dt;
+	}
 }
