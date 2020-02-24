@@ -1,3 +1,4 @@
+
 #pragma once
 #define _USE_MATH_DEFINES
 #include <vector>
@@ -15,7 +16,7 @@ public:
 	double rho, P;					//density and pressure
 	double a[2], D;					//acceleration and rate of change of density
 
-	static SPH_main *main_data;		//link to SPH_main class so that it can be used in calc_index
+	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
 	int list_num[2];				//index in neighbour finding array
 
@@ -35,11 +36,11 @@ public:
 	void set_values(void);
 	void initialise_grid(void);
 
-	void place_points(double *min, double *max);
+	void place_points(double* min, double* max);
 
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 
-	void neighbour_iterate(SPH_particle *part);
+	void neighbour_iterate(SPH_particle* part);
 
 	double h;								//smoothing length
 	double h_fac;
