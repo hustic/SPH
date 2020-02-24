@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -12,6 +13,7 @@ class SPH_particle
 public:
 	double x[2], v[2];				//position and velocity
 	double rho, P;					//density and pressure
+	double a[2], D;					//acceleration and rate of change of density
 
 	static SPH_main *main_data;		//link to SPH_main class so that it can be used in calc_index
 
@@ -25,6 +27,9 @@ class SPH_main
 {
 public:
 	SPH_main();
+	double cubic_spline(double r[2]);
+	double cubic_spline_first_derivative(double r[2]);
+	void update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part);
 
 	void set_values(void);
 	void initialise_grid(void);
@@ -38,6 +43,9 @@ public:
 	double h;								//smoothing length
 	double h_fac;
 	double dx;								//particle initial spacing
+
+	double g[2];							//gravity constant
+	double mu;								//viscosity
 
 	double min_x[2], max_x[2];				//dimensions of simulation region
 
