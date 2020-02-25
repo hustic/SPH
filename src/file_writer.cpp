@@ -129,6 +129,9 @@ double get_pressure(SPH_particle p) {
   /* Return pressure for particle p */
   return p.P;
 }
+double get_density(SPH_particle p) {
+    return p.rho;
+}
 
 int get_Type(SPH_particle p)
 {
@@ -157,6 +160,7 @@ int write_file(const char *filename,
   fs << "<Piece NumberOfPoints=\""<< particle_list->size() << "\" NumberOfVerts=\"" << particle_list->size() <<"\" NumberOfLines=\"0\" NumberOfStrips=\"0\" NumberOfPolys=\"0\">\n";
   fs << "<PointData>\n";
   fs << scalar_to_string("Pressure", particle_list, get_pressure);
+  fs << scalar_to_string("Density", particle_list, get_density);
   fs << vector_to_string("Velocity", particle_list, get_velocity);
   fs << scalar_to_string_int("Type", particle_list, get_Type);
   fs << "</PointData>\n";

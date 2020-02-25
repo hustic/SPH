@@ -22,7 +22,7 @@ public:
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
 	int list_num[2];				//index in neighbour finding array
-
+	bool is_boundary;				//if it is a boundary particle
 	void calc_index(void);
 };
 
@@ -39,7 +39,7 @@ public:
 	void set_values(void);
 	void initialise_grid(void);
 
-	void place_points(double* min, double* max);
+	void place_points(double min0, double min1, double max0, double max1);
 
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 
@@ -58,6 +58,7 @@ public:
 	double rho0;							//initial density
 	double B;
 	double gamma;
+	double mass;
 
 	double min_x[2], max_x[2];				//dimensions of simulation region
 
