@@ -93,8 +93,9 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 
 						if (dist < 2. * h && dist != 0)					//only particle within 2h
 						{
-							numerator += cubic_spline(dn);
-							denominator += cubic_spline(dn) / other_part->rho;
+							double cs = cubic_spline(dn);
+							numerator += cs;
+							denominator += cs / other_part->rho;
 						}
 						
 						
