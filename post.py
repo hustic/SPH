@@ -29,6 +29,8 @@ for f in files:
 
     pressure = datas[2].strip().split(" ")
     velocity = datas[5].strip().split(" ")
+    types = datas[8].strip().split(" ")
+    density = datas[11].strip().split(" ")
 
     vel = []
     for t in zip(*[iter(velocity)]*3):
@@ -37,11 +39,19 @@ for f in files:
     press = []
     for t in pressure:
         press.append(float(t))
+    ty = []
+    for t in types:
+        ty.append(int(t)) 
+    den = []
+    for t in density:
+        den.append(float(t))
     
 #print(position)
     df = pd.DataFrame(pos, columns=['x', 'y', 'z'])
     df['vel_x'], df['vel_y'], df['vel_z'] = [vel[:, 0], vel[:, 1], vel[:, 2]]
     df['pressure'] = press
+    df['types'] = types
+    df['density'] = density
     iters.append(df)
     
 for i in range(len(iters)):
