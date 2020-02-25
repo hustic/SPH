@@ -1,5 +1,5 @@
 ﻿#include "SPH_2D.h"
-
+#include "gnuplot.h"
 
 
 SPH_main *SPH_particle::main_data;
@@ -35,7 +35,7 @@ double SPH_main::cubic_spline(double r[2])
 	}
 	else if (q > 1 and q <= 2)
 	{
-		return -10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
+		return 10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
 	}
 	else { return 0; }
 }
@@ -49,7 +49,7 @@ double SPH_main::cubic_spline_first_derivative(double r[2])
 	}
 	else if (q > 1 and q <= 2)
 	{
-		return 10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
+		return -10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
 	}
 	else { return 0; }
 }
@@ -273,7 +273,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 								}
 
 								dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
-								if (dist < 2. * h)					//only particle within 2h
+								if (dist < 2. * h && dist != 0)					//only particle within 2h
 								{
 									update_gradients(dn1, part, other_part);
 									update_gradients(dn2, other_part, part);
@@ -298,7 +298,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 								}
 
 								dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
-								if (dist < 2. * h)					//only particle within 2h
+								if (dist < 2. * h && dist != 0)					//only particle within 2h
 								{
 									update_gradients(dn1, part, other_part);
 									update_gradients(dn2, other_part, part);

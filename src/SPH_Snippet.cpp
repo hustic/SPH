@@ -1,11 +1,17 @@
 #include "SPH_2D.h"
 #include "file_writer.h"
+#include "gnuplot.h"
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+
+using namespace std;
 
 SPH_main domain;
+
+void file_out(SPH_particle* part, int ite);
 
 int main(void)
 {
@@ -21,20 +27,30 @@ int main(void)
 
 	domain.allocate_to_grid();
 
+	fstream fp;
 	stringstream name;
-	name << "initial_configuration.vtp";
+	name << "ite" << "_" << 0 << ".dat";
+	fp.open(name.str().c_str(), ios_base::out);
+	for (int i = 0; i < domain.particle_list.size(); i++)
+	{
+		fp << domain.particle_list[i].x[0] << " " << domain.particle_list[i].x[1] << "\n";
+	}
+	fp.close();
+	// name << "initial_configuration.vtp";
 
 
-	write_file(name.str().c_str(), &domain.particle_list);
+	// write_file(name.str().c_str(), &domain.particle_list);
 
-	for (int iter = 1; iter < 30; iter++) {
-		cout << "iter = " << iter << endl;
+	for (int iter = 1; iter < 10000; iter++) {
+
+		// cout << "iter = " << iter << endl;
 		for (int i = 0; i < domain.particle_list.size(); i++)
 		{
-			if (domain.particle_list[i].x[0] < domain.min_x[0] || domain.particle_list[i].x[1] < domain.min_x[1])
-				cout << "out of min range" << endl;
-			else if (domain.particle_list[i].x[0] > domain.max_x[0] || domain.particle_list[i].x[1] > domain.max_x[1])
-				cout << "out of max range" << endl;
+			
+			// if (domain.particle_list[i].x[0] < domain.min_x[0] || domain.particle_list[i].x[1] < domain.min_x[1])
+				// cout << "out of min range" << endl;
+			// else if (domain.particle_list[i].x[0] > domain.max_x[0] || domain.particle_list[i].x[1] > domain.max_x[1])
+				// cout << "out of max range" << endl;
 
 				domain.neighbour_iterate(&domain.particle_list[i]);
 		}
@@ -43,7 +59,7 @@ int main(void)
 
 		domain.reset_grid_count();
 		if (iter % 10 == 0) {
-			cout << "Density field smoothed at iter = " << iter << endl;
+			// cout << "Density field smoothed at iter = " << iter << endl;
 			for (int i = 0; i < domain.particle_list.size(); i++)
 				domain.density_field_smoothing(&domain.particle_list[i]);
 		}
@@ -53,6 +69,7 @@ int main(void)
 			domain.update_rho(&domain.particle_list[i]);
 		}
 
+		// cout << domain.particle_list[2000].x[0] << " " << domain.particle_list[2000].x[1] << endl;
 
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
@@ -60,14 +77,20 @@ int main(void)
 		domain.reset_grid_count();
 		domain.allocate_to_grid();								//update grid index of each particle
 		stringstream name;
-        name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";		
+        // name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";		
 		
-		write_file(name.str().c_str(), &domain.particle_list);
+		if (iter % 100 == 0)
+		{
+			name << "ite" << "_" << iter << ".dat";
+			fp.open(name.str().c_str(), ios_base::out);
+			// write_file(name.str().c_str(), &domain.particle_list);
+			for (int i = 0; i < domain.particle_list.size(); i++)
+			{
 
+				fp << domain.particle_list[i].P << " " << domain.particle_list[i].rho << "\n";
+			}
+			fp.close();
+		}
 	}
-	
-
-	
-	
 	return 0;
 }

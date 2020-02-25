@@ -98,7 +98,7 @@ double get_position(SPH_particle p, int i) {
 
 double get_pressure(SPH_particle p) {
   /* Return pressure for particle p */
-  return p.rho;
+  return p.P;
 }
 
 
