@@ -8,7 +8,7 @@ import numpy as np
 import sys
 
 
-
+hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
 
 files = sorted(glob.glob(sys.argv[1]+'*'))
 iters = []
@@ -45,6 +45,9 @@ for f in files:
     iters.append(df)
     
 for i in range(len(iters)):
-    iters[i].to_hdf(sys.argv[1]+'.h5',key='s'+str(i), mode='w')
+    #iters[i].to_hdf(sys.argv[1]+'.h5',key='s'+str(i), mode='w')
+    hdf.put('s'+str(i), iters[i])
+
+hdf.close()
     
     
