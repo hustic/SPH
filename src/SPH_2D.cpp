@@ -35,7 +35,7 @@ double SPH_main::cubic_spline(double r[2])
 	}
 	else if (q > 1 and q <= 2)
 	{
-		return -10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
+		return 10  * 0.25 * pow((2 - q), 3) / (7 * M_PI * h * h);
 	}
 	else { return 0; }
 }
@@ -49,7 +49,7 @@ double SPH_main::cubic_spline_first_derivative(double r[2])
 	}
 	else if (q > 1 and q <= 2)
 	{
-		return 10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
+		return -10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(h, 3));
 	}
 	else { return 0; }
 }
