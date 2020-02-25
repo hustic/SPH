@@ -20,7 +20,7 @@ public:
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
 	int list_num[2];				//index in neighbour finding array
-
+	bool is_boundary;				//if it is a boundary particle
 	void calc_index(void);
 };
 
@@ -56,6 +56,7 @@ public:
 	double rho0;							//initial density
 	double B;
 	double gamma;
+	double mass;
 
 	double min_x[2], max_x[2];				//dimensions of simulation region
 
