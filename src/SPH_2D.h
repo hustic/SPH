@@ -18,8 +18,8 @@ public:
 	double D;						//rate of change of density
 	double rho2;
 
-	double numerator;
-	double denominator;
+	double numerator = 0;
+	double denominator = 0;
 
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
@@ -62,6 +62,7 @@ public:
 	double rho0;							//initial density
 	double B;
 	double gamma;
+	double mass;
 
 	double numerator2 = 0;
 	double denominator2 = 0;

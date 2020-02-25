@@ -120,12 +120,13 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 
 								other_part->numerator += cubic_spline(dn2);
 								other_part->denominator += cubic_spline(dn2) / part->rho;
+
 							}
 						}
-						if (part != other_part) ++grid_count[i][j];
+						++grid_count[i][j];
 					}
 				}
-	part->rho2 = part->numerator / part->denominator;
+	if (part->numerator != 0) part->rho2 = part->numerator / part->denominator;
 }
 
 void SPH_main::set_values(void)
@@ -322,5 +323,5 @@ void SPH_main::reset_grid_count()
 }
 void SPH_main::update_rho(SPH_particle* part)
 {
-	part->rho = part->rho2;
+	if (part->rho2 != 0) part->rho = part->rho2;
 }
