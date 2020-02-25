@@ -28,10 +28,10 @@ int main(void)
 			domain.neighbour_iterate(&domain.particle_list[i]);
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle(&domain.particle_list[i]);
-		if (iter % 10 == 0) {
-			for (int i = 0; i < domain.particle_list.size(); i++)
-				domain.density_field_smoothing(&domain.particle_list[i]);
-		}
+		//if (iter % 10 == 0) {
+		//	for (int i = 0; i < domain.particle_list.size(); i++)
+		//		domain.density_field_smoothing(&domain.particle_list[i]);
+		//}
 		
 		
 		stringstream name;

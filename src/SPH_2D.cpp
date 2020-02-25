@@ -53,8 +53,9 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 	{
 		vij[n] = part->v[n] - other_part->v[n];
 		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
-		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
+		part->a[n] += (-1)*mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
+	//cout << part->a[0] << " " << part->a[1] << endl;
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 }
 
@@ -230,6 +231,8 @@ void SPH_main::update_particle(SPH_particle* part)
 		part->x[k] = part->x[k] + dt * part->v[k];
 		part->v[k] = part->v[k] + dt * part->a[k];
 	}
+	//cout << part->x[0] << " " << part->x[1] << endl;
 	part->rho = part->rho + part->D;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+    
 }

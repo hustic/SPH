@@ -1,53 +1,50 @@
 #!/usr/bin/env python
 
 import glob
-import vtk
-
-def get_program_parameters():
-    import argparse
-    description = 'Read a polydata file.'
-    epilogue = ''''''
-    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('filename', help='example.vtp')
-    args = parser.parse_args()
-    return args.filename
+from lxml import etree
+import itertools
+import pandas as pd
+import numpy as np
+import sys
 
 
-def main():
-    colors = vtk.vtkNamedColors()
-
-    filename = get_program_parameters()
-
-    # Read all the data from the file
-    reader = vtk.vtkXMLPolyDataReader()
-    reader.SetFileName(filename)
-    reader.Update()
-
-    # Visualize
-    mapper = vtk.vtkPolyDataMapper()
-    mapper.SetInputConnection(reader.GetOutputPort())
-
-    actor = vtk.vtkActor()
-    actor.SetMapper(mapper)
-    actor.GetProperty().SetColor(colors.GetColor3d("Black"))
-
-    renderer = vtk.vtkRenderer()
-    renderWindow = vtk.vtkRenderWindow()
-    renderWindow.AddRenderer(renderer)
-    renderWindowInteractor = vtk.vtkRenderWindowInteractor()
-    renderWindowInteractor.SetRenderWindow(renderWindow)
-
-    renderer.AddActor(actor)
-    renderer.SetBackground(colors.GetColor3d('White'))
-    renderer.GetActiveCamera().SetViewUp(0, 0, 1)
-    renderer.ResetCamera()
-
-    renderWindow.SetSize(600, 600)
-    renderWindow.Render()
-    renderWindow.SetWindowName('ReadPolyData')
-    renderWindowInteractor.Start()
 
 
-if __name__ == '__main__':
-    main()
+files = sorted(glob.glob(sys.argv[1]+'*'))
+iters = []
+for f in files:
+    doc = etree.parse(f)
+
+    pointdata = doc.find('.//PointData')
+    points = doc.find('.//Points')
+
+    position = etree.tostring(points, encoding='unicode').split("\n")[2].strip().split(" ")
+
+
+    pos = []
+    for t in zip(*[iter(position)]*3):
+        pos.append([float(t[0]), float(t[1]), float(t[2])])
+    
+    datas = etree.tostring(pointdata, encoding='unicode').strip().split("\n")
+
+    pressure = datas[2].strip().split(" ")
+    velocity = datas[5].strip().split(" ")
+
+    vel = []
+    for t in zip(*[iter(velocity)]*3):
+        vel.append([float(t[0]), float(t[1]), float(t[2])])
+    vel = np.array(vel)
+    press = []
+    for t in pressure:
+        press.append(float(t))
+    
+#print(position)
+    df = pd.DataFrame(pos, columns=['x', 'y', 'z'])
+    df['vel_x'], df['vel_y'], df['vel_z'] = [vel[:, 0], vel[:, 1], vel[:, 2]]
+    df['pressure'] = press
+    iters.append(df)
+    
+for i in range(len(iters)):
+    iters[i].to_hdf(sys.argv[1]+'.h5',key='s'+str(i), mode='w')
+    
+    
