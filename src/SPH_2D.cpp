@@ -229,7 +229,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 								dn[n] = part->x[n] - other_part->x[n];
 
 							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
-							if (dist < 2. * h)					//only particle within 2h
+							if (dist < 2. * h && dist != 0)					//only particle within 2h
 								update_gradients(dn, part, other_part);
 						}
 					}
