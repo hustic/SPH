@@ -1,8 +1,14 @@
 ﻿#include "SPH_2D.h"
-#include "gnuplot.h"
 
 
 SPH_main *SPH_particle::main_data;
+
+
+SPH_main::SPH_main(): grid_count()
+{
+	SPH_particle::main_data = this;
+}
+
 
 void SPH_particle::calc_index(void)
 {
@@ -20,10 +26,6 @@ void SPH_particle::calc_index(void)
 	}
 }
 
-SPH_main::SPH_main(): grid_count()
-{
-	SPH_particle::main_data = this;
-}
 
 
 double SPH_main::cubic_spline(double r[2])
@@ -66,8 +68,8 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
-
 }
+
 
 void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
 {
@@ -81,11 +83,10 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
 		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
-			
 				if (i >= 0 && i < max_list[0])
 				{
 					// if not in the same grid
-					if (j != part->list_num[1] && i != part->list_num[0])
+					if (j != part->list_num[1] || i != part->list_num[0])
 					{
 						for (cnt = 0; cnt < search_grid[i][j].size(); cnt++)
 						{
@@ -257,7 +258,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 				if (i >= 0 && i < max_list[0])
 				{
 					// if not in the same grid
-					if (j != part->list_num[1] && i != part->list_num[0])
+					if (j != part->list_num[1] || i != part->list_num[0])
 					{
 						for (cnt = 0; cnt < search_grid[i][j].size(); cnt++)
 						{
@@ -329,17 +330,18 @@ void SPH_main::update_particle(SPH_particle* part)
 				part->v[k] = part->v[k] + dt * part->a[k];
 			}
 		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
 	}
+
 	part->rho = part->rho + part->D * dt;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
 
-	for (int n = 0; n < 2; n++)
-	{
-		part->a[n] = 0.0 + g[n];
-	}
 	part->D = 0.0;
-	part->numerator = 0;
-	part->denominator = 0;
+	part->numerator = 0.0;
+	part->denominator = 0.0;
 }
 
 
