@@ -75,19 +75,16 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 					{
 						other_part = search_grid[i][j][cnt];
 
-						if (part != other_part)					//stops particle interacting with itself
+						//Calculates the distance between potential neighbours
+						for (int n = 0; n < 2; n++)
+							dn[n] = part->x[n] - other_part->x[n];
+
+						dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
+
+						if (dist < 2. * h)					//only particle within 2h
 						{
-							//Calculates the distance between potential neighbours
-							for (int n = 0; n < 2; n++)
-								dn[n] = part->x[n] - other_part->x[n];
-
-							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
-
-							if (dist < 2. * h)					//only particle within 2h
-							{
-								numerator += cubic_spline(dn);
-								denominator += numerator / other_part->rho;
-							}
+							numerator += cubic_spline(dn);
+							denominator += numerator / other_part->rho;
 						}
 					}
 				}
