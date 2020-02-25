@@ -26,6 +26,7 @@ int main(void)
 	for (int iter = 0; iter < 10; iter++) {
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.neighbour_iterate(&domain.particle_list[i]);
+
 		for (int i = 0; i < domain.particle_list.size(); i++)
 		{
 			domain.update_particle(&domain.particle_list[i]);

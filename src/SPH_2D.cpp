@@ -56,6 +56,8 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
+	// cout << part->D << " " << part->a[1] << endl;;
+
 }
 
 void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
@@ -90,10 +92,10 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 							if (dist < 2. * h)		//only particle within 2h
 							{
 								part->numerator += cubic_spline(dn1);
-								part->denominator += part->numerator / other_part->rho;
+								part->denominator += cubic_spline(dn1) / other_part->rho;
 
 								other_part->numerator += cubic_spline(dn2);
-								other_part->denominator += other_part->numerator / part->rho;
+								other_part->denominator += cubic_spline(dn2) / part->rho;
 							}
 						}
 					}
@@ -114,13 +116,13 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 							if (dist < 2. * h)					//only particle within 2h
 							{
 								part->numerator += cubic_spline(dn1);
-								part->denominator += part->numerator / other_part->rho;
+								part->denominator += cubic_spline(dn1) / other_part->rho;
 
 								other_part->numerator += cubic_spline(dn2);
-								other_part->denominator += other_part->numerator / part->rho;
+								other_part->denominator += cubic_spline(dn2) / part->rho;
 							}
 						}
-						++grid_count[i][j];
+						if (part != other_part) ++grid_count[i][j];
 					}
 				}
 	part->rho2 = part->numerator / part->denominator;
