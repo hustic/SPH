@@ -27,10 +27,19 @@ int main(void)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.neighbour_iterate(&domain.particle_list[i]);
 		for (int i = 0; i < domain.particle_list.size(); i++)
+		{
 			domain.update_particle(&domain.particle_list[i]);
+		}
+			domain.reset_grid_count();
+
 		if (iter % 10 == 0) {
 			for (int i = 0; i < domain.particle_list.size(); i++)
 				domain.density_field_smoothing(&domain.particle_list[i]);
+
+			for (int i = 0; i < domain.particle_list.size(); i++)
+				domain.update_rho(&domain.particle_list[i]);
+
+			domain.reset_grid_count();
 		}
 		
 		
