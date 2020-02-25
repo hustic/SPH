@@ -18,14 +18,15 @@ int main(void)
 	domain.place_points(20.0, -0.52, 20.52, 10.52);				//right boundary
 	domain.place_points(0.0, 5.0, 3.52, 10.52);
 	domain.place_points(3.0, 7.0, 20.0, 10.52);
+	domain.place_points(domain.min_x[0], domain.min_x[1], domain.max_x[0], domain.max_x[1]);
 
 	domain.allocate_to_grid();									//needs to be called for each time step
 
 	stringstream name;
 	name << "initial_configuration.vtp";
 
-
-	write_file(name.str().c_str(), &domain.particle_list);{
+	
+	write_file(name.str().c_str(), &domain.particle_list);
 
 	
 	for (int iter = 1; iter < 30; iter++) {
@@ -58,9 +59,7 @@ int main(void)
 		write_file(name.str().c_str(), &domain.particle_list);
 		
 	}
-	
 
-	
 	
 	return 0;
 }

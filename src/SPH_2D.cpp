@@ -153,7 +153,7 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1)
 	while (x[0] <= max0)
 	{
 		x[1] = min1;
-		while (x[1] <= min1)
+		while (x[1] <= max1)
 		{
 			for (int i = 0; i < 2; i++)
 			{
