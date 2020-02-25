@@ -145,15 +145,15 @@ void SPH_main::initialise_grid(void)
 }
 
 
-void SPH_main::place_points(double* min, double* max)
+void SPH_main::place_points(double min0, double min1, double max0, double max1)
 {
-	double x[2] = { min[0], min[1] };
+	double x[2] = { min0, min1 };
 	SPH_particle particle;
 
-	while (x[0] <= max[0])
+	while (x[0] <= max0)
 	{
-		x[1] = min[1];
-		while (x[1] <= max[1])
+		x[1] = min1;
+		while (x[1] <= min1)
 		{
 			for (int i = 0; i < 2; i++)
 			{
