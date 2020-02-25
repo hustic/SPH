@@ -8,7 +8,7 @@ int main(void)
 	domain.set_values();										//Set simulation parameters
 	domain.initialise_grid();									//initialise simulation grid
 
-	domain.place_points(domain.min_x,domain.max_x);				//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
+	domain.place_points(domain.min_x[0], domain.min_x[1], domain.max_x[0], domain.max_x[1]);				//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
 
 	domain.allocate_to_grid();									//needs to be called for each time step
 
