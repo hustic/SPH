@@ -1,4 +1,4 @@
-#include "new.h"
+#include "SPH_2D.h"
 #include "file_writer.h"
 #include <string>
 #include <sstream>
