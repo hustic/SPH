@@ -1,4 +1,3 @@
-
 #pragma once
 #define _USE_MATH_DEFINES
 #include <vector>
@@ -14,7 +13,8 @@ class SPH_particle
 public:
 	double x[2], v[2];				//position and velocity
 	double rho, P;					//density and pressure
-	double a[2], D;					//acceleration and rate of change of density
+	double a[2];					//acceleration
+	double D;						//rate of change of density
 
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
@@ -31,6 +31,7 @@ public:
 	double cubic_spline(double r[2]);
 	double cubic_spline_first_derivative(double r[2]);
 	void update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part);
+	void density_field_smoothing(SPH_particle* part);
 
 	void set_values(void);
 	void initialise_grid(void);
@@ -40,13 +41,20 @@ public:
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 
 	void neighbour_iterate(SPH_particle* part);
+	void update_particle();
 
 	double h;								//smoothing length
 	double h_fac;
 	double dx;								//particle initial spacing
+	double c0;								//speed of sound
+
+	double dt;								//time step
 
 	double g[2];							//gravity constant
 	double mu;								//viscosity
+	double rho0;							//initial density
+	double B;
+	double gamma;
 
 	double min_x[2], max_x[2];				//dimensions of simulation region
 
