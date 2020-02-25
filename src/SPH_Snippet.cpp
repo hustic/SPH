@@ -14,7 +14,7 @@ int main(void)
 
 	//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
 	domain.place_points(-0.52, -0.52, 0.0, 10.52);				//left boundary
-	domain.place_points(0.0, -0.52, 20.0, 0.52);				//top boundary
+	domain.place_points(0.0, -0.52, 20.0, 0.0);				//top boundary
 	domain.place_points(20.0, -0.52, 20.52, 10.52);				//right boundary
 	domain.place_points(0.0, 5.0, 3.52, 10.52);
 	domain.place_points(3.0, 7.0, 20.0, 10.52);
