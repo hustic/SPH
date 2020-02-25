@@ -29,7 +29,7 @@ int main(void)
 	name << "initial_configuration.vtp";
 	write_file(name.str().c_str(), &domain.particle_list);
 
-	for (int iter = 1; iter < 5000; iter++) {
+	for (int iter = 1; iter < 10000; iter++) {
 
 		// cout << "iter = " << iter << endl;
 		for (int j = 0; j < domain.max_list[1]; j++)

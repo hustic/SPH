@@ -151,7 +151,7 @@ void SPH_main::set_values(void)
 	max_x[0] = 20.0;
 	max_x[1] = 10.0;
 
-	dx = 0.2;
+	dx = 0.1;
 	c0 = 20;
 
 	mu = 0.001;
