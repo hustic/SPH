@@ -17,6 +17,8 @@ public:
 	double a[2];					//acceleration
 	double D;						//rate of change of density
 
+	bool is_boundary;
+
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
 	int list_num[2];				//index in neighbour finding array
