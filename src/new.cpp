@@ -20,7 +20,7 @@ void SPH_particle::calc_index(void)
 	}
 }
 
-SPH_main::SPH_main()
+SPH_main::SPH_main(): grid_count()
 {
 	SPH_particle::main_data = this;
 }
@@ -66,6 +66,7 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
+
 }
 
 void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
@@ -78,8 +79,9 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	int cnt;
 
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
-		if (j < max_list[1])
+		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
+			
 				if (i >= 0 && i < max_list[0])
 				{
 					// if not in the same grid
@@ -134,7 +136,10 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 						++grid_count[i][j];
 					}
 				}
-	if (part->numerator != 0) part->rho2 = part->numerator / part->denominator;
+	if (part->numerator != 0) 
+	{
+		part->rho2 = part->numerator / part->denominator;
+	}
 }
 
 void SPH_main::set_values(void)
@@ -174,20 +179,24 @@ void SPH_main::initialise_grid(void)
 	}
 
 	search_grid.resize(max_list[0]);
+	grid_count.resize(max_list[0]);
 	for (int i = 0; i < max_list[0]; i++)
+	{
 		search_grid[i].resize(max_list[1]);
+		grid_count[i].resize(max_list[1]);
+	}
 }
 
 
-void SPH_main::place_points(double* min, double* max)
+void SPH_main::place_points(double min0, double min1, double max0, double max1)
 {
-	double x[2] = { min[0], min[1] };
+	double x[2] = { min0, min1 };
 	SPH_particle particle;
 
-	while (x[0] <= max[0])
+	while (x[0] <= max0)
 	{
-		x[1] = min[1];
-		while (x[1] <= max[1])
+		x[1] = min1;
+		while (x[1] <= max1)
 		{
 			for (int i = 0; i < 2; i++)
 			{
@@ -229,7 +238,6 @@ void SPH_main::allocate_to_grid(void)				//needs to be called each time that all
 	{
 		search_grid[particle_list[cnt].list_num[0]][particle_list[cnt].list_num[1]].push_back(&particle_list[cnt]);
 	}
-	
 }
 
 
@@ -243,9 +251,8 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
     int cnt;
 
 
-
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
-		if (j < max_list[1])
+		if (j>= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
 				if (i >= 0 && i < max_list[0])
 				{
@@ -301,6 +308,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 						++grid_count[i][j];
 					}
 				}
+
 }
 
 void SPH_main::update_particle(SPH_particle* part) 
@@ -330,7 +338,6 @@ void SPH_main::update_particle(SPH_particle* part)
 		part->a[n] = 0.0 + g[n];
 	}
 	part->D = 0.0;
-
 	part->numerator = 0;
 	part->denominator = 0;
 }
@@ -343,5 +350,9 @@ void SPH_main::reset_grid_count()
 }
 void SPH_main::update_rho(SPH_particle* part)
 {
-	if (part->rho2 != 0) part->rho = part->rho2;
+	if (part->rho2 != 0) 
+	{
+		part->rho = part->rho2;
+	}
+	part->rho2 = 0;
 }

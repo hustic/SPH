@@ -1,4 +1,4 @@
-﻿#include "SPH_2D.h"
+﻿#include "new.h"
 
 
 
@@ -7,10 +7,20 @@ SPH_main *SPH_particle::main_data;
 void SPH_particle::calc_index(void)
 {
 	for (int i = 0; i < 2; i++)
+	{
+		if (x[i] < main_data->min_x[i])
+		{
+			x[i] = main_data->min_x[i]; 
+		}
+		else if (x[i] > main_data->max_x[i])
+		{
+			x[i] = main_data->max_x[i];
+		}
 		list_num[i] = int((x[i] - main_data->min_x[i]) / (2.0 * main_data->h));
+	}
 }
 
-SPH_main::SPH_main(): grid_count(0)
+SPH_main::SPH_main(): grid_count()
 {
 	SPH_particle::main_data = this;
 }
@@ -46,7 +56,7 @@ double SPH_main::cubic_spline_first_derivative(double r[2])
 
 void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part)		//updates acceleration and rate of change of density of a particle
 {	
-	double mass = part->rho * dx * dx;
+	
 	double vij[2], eij[2];
 	double dwdr = cubic_spline_first_derivative(r);
 	for (int n = 0; n < 2; n++)
@@ -56,7 +66,6 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
-	// cout << part->D << " " << part->a[1] << endl;;
 
 }
 
@@ -70,8 +79,9 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	int cnt;
 
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
-		if (j < max_list[1])
+		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
+			
 				if (i >= 0 && i < max_list[0])
 				{
 					// if not in the same grid
@@ -126,7 +136,10 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 						++grid_count[i][j];
 					}
 				}
-	if (part->numerator != 0) part->rho2 = part->numerator / part->denominator;
+	if (part->numerator != 0) 
+	{
+		part->rho2 = part->numerator / part->denominator;
+	}
 }
 
 void SPH_main::set_values(void)
@@ -134,17 +147,17 @@ void SPH_main::set_values(void)
 	min_x[0] = 0.0;
 	min_x[1] = 0.0;
 
-	max_x[0] = 1.0;
-	max_x[1] = 1.0;
+	max_x[0] = 20.0;
+	max_x[1] = 10.0;
 
-	dx = 0.02;
+	dx = 0.2;
 	c0 = 20;
 
 	mu = 0.001;
 	g[0] = 0.0;
 	g[1] = 9.81;
 	rho0 = 1000;
-
+	mass = rho0 * dx * dx;
 	h_fac = 1.3;
 
 	h = dx*h_fac;
@@ -172,19 +185,18 @@ void SPH_main::initialise_grid(void)
 		search_grid[i].resize(max_list[1]);
 		grid_count[i].resize(max_list[1]);
 	}
-
 }
 
 
-void SPH_main::place_points(double* min, double* max)
+void SPH_main::place_points(double min0, double min1, double max0, double max1)
 {
-	double x[2] = { min[0], min[1] };
+	double x[2] = { min0, min1 };
 	SPH_particle particle;
 
-	while (x[0] <= max[0])
+	while (x[0] <= max0)
 	{
-		x[1] = min[1];
-		while (x[1] <= max[1])
+		x[1] = min1;
+		while (x[1] <= max1)
 		{
 			for (int i = 0; i < 2; i++)
 			{
@@ -195,6 +207,16 @@ void SPH_main::place_points(double* min, double* max)
 			particle.D = 0.0;
 			particle.rho = rho0;
 			particle.P = 0.0;
+			particle.is_boundary = false;
+			for (int i = 0; i < 2; i++)
+			{
+				if (particle.x[i] <= min_x[i] + 2.0 * h || particle.x[i] >= max_x[i] - 2.0 * h)
+				{
+					particle.is_boundary = true;
+					break;
+				}
+			}
+			
 
 			particle.calc_index();
 
@@ -212,7 +234,6 @@ void SPH_main::allocate_to_grid(void)				//needs to be called each time that all
 	for (int i = 0; i < max_list[0]; i++)
 		for (int j = 0; j < max_list[1]; j++)
 			search_grid[i][j].clear();
-
 	for (unsigned int cnt = 0; cnt < particle_list.size(); cnt++)
 	{
 		search_grid[particle_list[cnt].list_num[0]][particle_list[cnt].list_num[1]].push_back(&particle_list[cnt]);
@@ -227,17 +248,11 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 	double dist;			//distance between particles
 	double dn1[2];			//vector from 1st to 2nd particle
 	double dn2[2];
-	double tmax = 30;
-	double t = 0;
-	double dt = 0.04;
-	int y = 7;
-	int c0 = 20;
-	double rho0 = 1000;
-	int cnt;
-	double B = (rho0 * c0 * c0) / y;
+    int cnt;
+
 
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
-		if (j < max_list[1])
+		if (j>= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
 				if (i >= 0 && i < max_list[0])
 				{
@@ -293,16 +308,29 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 						++grid_count[i][j];
 					}
 				}
+
 }
 
 void SPH_main::update_particle(SPH_particle* part) 
 {
-	for (int k = 0; k < 2; k++)
+	if (!part->is_boundary)
 	{
-		part->x[k] = part->x[k] + dt * part->v[k];
-		part->v[k] = part->v[k] + dt * part->a[k];
+		for (int k = 0; k < 2; k++)
+		{
+			if (part->x[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
+			{
+				part->v[k] = abs(part->v[k] + dt * part->a[k]);
+			}
+			else if(part->x[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
+				part->v[k] = -abs(part->v[k] + dt * part->a[k]);
+			}
+			else {
+				part->x[k] = part->x[k] + dt * part->v[k];
+				part->v[k] = part->v[k] + dt * part->a[k];
+			}
+		}
 	}
-	part->rho = part->rho + part->D;
+	part->rho = part->rho + part->D * dt;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
 
 	for (int n = 0; n < 2; n++)
@@ -310,7 +338,6 @@ void SPH_main::update_particle(SPH_particle* part)
 		part->a[n] = 0.0 + g[n];
 	}
 	part->D = 0.0;
-
 	part->numerator = 0;
 	part->denominator = 0;
 }
@@ -323,5 +350,9 @@ void SPH_main::reset_grid_count()
 }
 void SPH_main::update_rho(SPH_particle* part)
 {
-	if (part->rho2 != 0) part->rho = part->rho2;
+	if (part->rho2 != 0) 
+	{
+		part->rho = part->rho2;
+	}
+	part->rho2 = 0;
 }

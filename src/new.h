@@ -16,7 +16,7 @@ public:
 	double rho, P;					//density and pressure
 	double a[2];					//acceleration
 	double D;						//rate of change of density
-	double rho2;
+	double rho2 = 0;;
 
 	double numerator = 0;
 	double denominator = 0;
@@ -41,7 +41,7 @@ public:
 	void set_values(void);
 	void initialise_grid(void);
 
-	void place_points(double* min, double* max);
+	void place_points(double min0, double min1, double max0, double max1);
 
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 
