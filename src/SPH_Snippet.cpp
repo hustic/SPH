@@ -23,12 +23,12 @@ int main(void)
 	domain.place_points(20.0, -0.52, 20.52, 10.52);				//right boundary
 	domain.place_points(0.0, -0.52, 3.0, 5.0);
 	domain.place_points(3.0, -0.52, 20.0, 2.0);
+	domain.time_dynamic();
 	domain.allocate_to_grid();
 
 	stringstream name;
-	name << "initial_configuration.vtp";
+	name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
 	write_file(name.str().c_str(), &domain.particle_list);
-
 	for (int iter = 1; iter < 10000; iter++) {
 
 		// cout << "iter = " << iter << endl;
@@ -66,12 +66,12 @@ int main(void)
 			}
 		}
 
-		for (int i = 0; i < domain.particle_list.size(); i++)
-			domain.update_particle(&domain.particle_list[i]);
-
 		// last full step
 		for (int i = 0; i < domain.particle_list.size(); i++)
+		{
+			domain.update_particle(&domain.particle_list[i]);
 			domain.full_update(&domain.particle_list[i]);
+		}
 		
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
@@ -99,7 +99,14 @@ int main(void)
 		}
 		domain.reset_grid_count();
 		
-		if (iter % 100 == 0)
+		// get the max for minimum dynamic time step
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.get_new_max(&domain.particle_list[i]);
+
+		// get new dynamic time step
+		domain.time_dynamic();
+
+		if (iter % 50 == 0)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";		
