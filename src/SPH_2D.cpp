@@ -430,9 +430,17 @@ void SPH_main::time_dynamic()
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_f <= dt_a && dt_f <= dt_a && dt_f != 0)
+	else if (dt_a <= dt_f && dt_a != 0 && dt_cfl == 0)
+	{
+		dt = cfl * dt_a;
+	}
+	else if (dt_f != 0)
 	{
 		dt = cfl * dt_f;
+	}
+	else
+	{
+		dt = 0.5 * 0.1 * h / c0;
 	}
 	dt_f = 0;
 	dt_a = 0;
