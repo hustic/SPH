@@ -13,8 +13,27 @@ is using and holds all the functions, globals and data strucutres needed to run
 the simulation.
 
 ** /SPH_particle/
+TODO Include complete descriptions of class variables
 Class variables:
-- x[] (double) :: position
-- v[] (double) :: velocity
-- rho (double) :: density
-- P (double) :: pressure
+- x[] (double) :: Position
+- v[] (double) :: Velocity
+- rho (double) :: Density
+- P (double) :: Pressure
+- a[] (double) :: Acceleration
+- D (double) :: Rate of change of density
+- rho2 (dobule) ::
+- vij_half[] (double) ::
+- x_half[] (double) :: Position
+- v_half[] (double) :: Velocity
+- rho_half (double) :: Density
+- a_half[] (double) :: Acceleration
+- D_half (double) :: Rate of change of density
+- numerator (double) ::
+- denominator (double) ::
+- main_data (staic SPH_main *) :: Link to SPH_main class so that it can be used
+  to calc_index
+- list_num[] (int) :: Index in neighbour finding array
+- is_boundary (bool) :: Set true if the particle is part of the boundary
+
+Class functions:
+- calc_index(void) (void) ::
