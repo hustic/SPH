@@ -5,11 +5,11 @@ import subprocess
 import sys
 
 import tests.python_tests
+import tests.test_post
 
 DIR = "tests/bin/*"
 
 files = glob.glob(DIR)
-
 glob_fail = False
 for file in files:
     if sys.platform == "win32" and file.split(".")[-1] != "exe":
@@ -27,6 +27,9 @@ for file in files:
             glob_fail = True
         else:
             print("Test %s passed" % file)
+      
+
+tests.test_post.post()
 
 for name, attr in tests.python_tests.__dict__.items():
     if 'test' in name:
