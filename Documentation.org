@@ -1,0 +1,20 @@
+#+TITLE: Documentation
+
+This tool has been implemented in C++ with Python as a means to analyze data and
+test the output of the code. Bellow is the documentation of the functions used
+in the tool and an analysis of the testing pipline.
+
+* Code structure, Class variables and functions
+The tool is composed of two classes /SPH_particle/ and /SPH_main/.
+/SPH_particle/ is an object that represents each individual particle in our
+simulation and holds parameters and values that are specific to every particle
+(eg. position, velocity, etc). /SPH_main/ represents the domain the simulation
+is using and holds all the functions, globals and data strucutres needed to run
+the simulation.
+
+** /SPH_particle/
+Class variables:
+- x[] (double) :: position
+- v[] (double) :: velocity
+- rho (double) :: density
+- P (double) :: pressure
