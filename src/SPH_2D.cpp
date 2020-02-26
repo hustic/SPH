@@ -1,8 +1,14 @@
-﻿#include "SPH_2D.h"
-
+#include "SPH_2D.h"
 
 
 SPH_main *SPH_particle::main_data;
+
+
+SPH_main::SPH_main(): grid_count(), v_max(v_max), a_max(a_max), rho_max(rho_max)
+{
+	SPH_particle::main_data = this;
+}
+
 
 void SPH_particle::calc_index(void)
 {
@@ -20,10 +26,6 @@ void SPH_particle::calc_index(void)
 	}
 }
 
-SPH_main::SPH_main()
-{
-	SPH_particle::main_data = this;
-}
 
 
 double SPH_main::cubic_spline(double r[2])
@@ -65,43 +67,85 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 	}
+	if (part->vij_half[0] < sqrt(vij[0] * vij[0] + vij[1] * vij[1]) && !part->is_boundary && !other_part->is_boundary)
+	{
+		part->vij_half[0] = sqrt(vij[0] * vij[0] + vij[1] * vij[1]);
+	}
+	
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 }
+
 
 void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the density field smoothing for a particle
 {
 	SPH_particle* other_part;
 	double dist;			//distance between particles
-	double dn[2];			//vector from 1st to 2nd particle
-	double numerator = 0.0;
-	double denominator = 0.0;
+	double dn1[2];			//vector from 1st to 2nd particle
+	double dn2[2];			//vector from 1st to 2nd particle
 
-	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
-		if (i >= 0 && i < max_list[0])
-			for (int j = part->list_num[1] - 1; j <= part->list_num[1] + 1; j++)
-				if (j >= 0 && j < max_list[1])
+	int cnt;
+
+	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
+		if (j >= 0 && j < max_list[1])
+			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
+				if (i >= 0 && i < max_list[0])
 				{
-					for (unsigned int cnt = 0; cnt < search_grid[i][j].size(); cnt++)
+					// if not in the same grid
+					if (j != part->list_num[1] || i != part->list_num[0])
 					{
-						other_part = search_grid[i][j][cnt];
-																	
-						//Calculates the distance between potential neighbours
-						for (int n = 0; n < 2; n++)
-							dn[n] = part->x[n] - other_part->x[n];
-
-						dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);		
-
-						if (dist < 2. * h && dist != 0)					//only particle within 2h
+						for (cnt = 0; cnt < search_grid[i][j].size(); cnt++)
 						{
-							double cs = cubic_spline(dn);
-							numerator += cs;
-							denominator += cs / other_part->rho;
+							other_part = search_grid[i][j][cnt];
+
+							//Calculates the distance between potential neighbours
+							for (int n = 0; n < 2; n++)
+							{
+								dn1[n] = part->x[n] - other_part->x[n];
+								dn2[n] = other_part->x[n] - part->x[n];
+							}
+
+							dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
+							if (dist < 2. * h)		//only particle within 2h
+							{
+								part->numerator += cubic_spline(dn1);
+								part->denominator += cubic_spline(dn1) / other_part->rho;
+
+								other_part->numerator += cubic_spline(dn2);
+								other_part->denominator += cubic_spline(dn2) / part->rho;
+							}
 						}
-						
-						
+					}
+					// if in the same grid
+					else
+					{
+						for (cnt = grid_count[i][j]; cnt < search_grid[i][j].size(); cnt++)
+						{
+							other_part = search_grid[i][j][cnt];
+
+							//Calculates the distance between potential neighbours
+							for (int n = 0; n < 2; n++)
+							{
+								dn1[n] = part->x[n] - other_part->x[n];
+								dn2[n] = other_part->x[n] - part->x[n];
+							}
+							dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
+							if (dist < 2. * h)					//only particle within 2h
+							{
+								part->numerator += cubic_spline(dn1);
+								part->denominator += cubic_spline(dn1) / other_part->rho;
+
+								other_part->numerator += cubic_spline(dn2);
+								other_part->denominator += cubic_spline(dn2) / part->rho;
+
+							}
+						}
+						++grid_count[i][j];
 					}
 				}
-	part->rho = numerator / denominator;
+	if (part->numerator != 0) 
+	{
+		part->rho2 = part->numerator / part->denominator;
+	}
 }
 
 void SPH_main::set_values(void)
@@ -117,13 +161,19 @@ void SPH_main::set_values(void)
 
 	mu = 0.001;
 	g[0] = 0.0;
-	g[1] = 9.81;
+	g[1] = -9.81;
 	rho0 = 1000;
 	mass = rho0 * dx * dx;
 	h_fac = 1.3;
 
+	cfl = 0.2;
+
+	a_max = -g[1];
+	v_max = 0;
+	rho_max = rho0;
+
 	h = dx*h_fac;
-	dt = 0.1 * h / c0;
+	// dt = 0.5 * 0.1 * h / c0;
 
 	gamma = 7.0;
 	B = c0 * c0 * rho0 / gamma;
@@ -141,8 +191,12 @@ void SPH_main::initialise_grid(void)
 	}
 
 	search_grid.resize(max_list[0]);
+	grid_count.resize(max_list[0]);
 	for (int i = 0; i < max_list[0]; i++)
+	{
 		search_grid[i].resize(max_list[1]);
+		grid_count[i].resize(max_list[1]);
+	}
 }
 
 
@@ -168,14 +222,13 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1)
 			particle.is_boundary = false;
 			for (int i = 0; i < 2; i++)
 			{
-				if (particle.x[i] <= min_x[i] + 2.0 * h || particle.x[i] >= max_x[i] - 2.0 * h)
+				if (particle.x[i] < min_x[i] + 2.0 * h || particle.x[i] >= max_x[i] - 2.0 * h)
 				{
 					particle.is_boundary = true;
 					break;
 				}
 			}
 			
-
 			particle.calc_index();
 
 			particle_list.push_back(particle);
@@ -196,7 +249,9 @@ void SPH_main::allocate_to_grid(void)				//needs to be called each time that all
 	{
 		search_grid[particle_list[cnt].list_num[0]][particle_list[cnt].list_num[1]].push_back(&particle_list[cnt]);
 	}
-	
+	a_max = 0;
+	v_max = 0;
+	rho_max = 0;
 }
 
 
@@ -205,35 +260,69 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 {
 	SPH_particle* other_part;
 	double dist;			//distance between particles
-	double dn[2];			//vector from 1st to 2nd particle
-	
-	for (int n = 0; n < 2; n++)
-	{
-		part->a[n] = 0.0 + g[n];
-	}
-	part->D = 0.0;
+	double dn1[2];			//vector from 1st to 2nd particle
+	double dn2[2];
+    int cnt;
 
-	for (int i = part->list_num[0] - 1; i <= part->list_num[0] + 1; i++)
-		if (i >= 0 && i < max_list[0])
-			for (int j = part->list_num[1] - 1; j <= part->list_num[1] + 1; j++)
-				if (j >= 0 && j < max_list[1])
+
+	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
+		if (j>= 0 && j < max_list[1])
+			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
+				if (i >= 0 && i < max_list[0])
 				{
-					for (unsigned int cnt = 0; cnt < search_grid[i][j].size(); cnt++)
+					// if not in the same grid
+					if (j != part->list_num[1] || i != part->list_num[0])
 					{
-						other_part = search_grid[i][j][cnt];
-
-						if (part != other_part)					//stops particle interacting with itself
+						for (cnt = 0; cnt < search_grid[i][j].size(); cnt++)
 						{
-							//Calculates the distance between potential neighbours
-							for (int n = 0; n < 2; n++)
-								dn[n] = part->x[n] - other_part->x[n];
+							other_part = search_grid[i][j][cnt];
 
-							dist = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
-							if (dist < 2. * h && dist != 0)					//only particle within 2h
-								update_gradients(dn, part, other_part);
+							if (part != other_part)		//stops particle interacting with itself
+							{
+								//Calculates the distance between potential neighbours
+								for (int n = 0; n < 2; n++)
+								{
+									dn1[n] = part->x[n] - other_part->x[n];
+									dn2[n] = other_part->x[n] - part->x[n];
+								}
+
+								dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
+								if (dist < 2. * h && dist != 0)					//only particle within 2h
+								{
+									update_gradients(dn1, part, other_part);
+									update_gradients(dn2, other_part, part);
+								}
+							}
 						}
 					}
+					// if in the same grid
+					else
+					{
+						for (cnt = grid_count[i][j]; cnt < search_grid[i][j].size(); cnt++)
+						{
+							other_part = search_grid[i][j][cnt];
+
+							if (part != other_part)		//stops particle interacting with itself
+							{
+								//Calculates the distance between potential neighbours
+								for (int n = 0; n < 2; n++)
+								{
+									dn1[n] = part->x[n] - other_part->x[n];
+									dn2[n] = other_part->x[n] - part->x[n];
+								}
+
+								dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
+								if (dist < 2. * h && dist != 0)					//only particle within 2h
+								{
+									update_gradients(dn1, part, other_part);
+									update_gradients(dn2, other_part, part);
+								}
+							}
+						}
+						++grid_count[i][j];
+					}
 				}
+
 }
 
 void SPH_main::update_particle(SPH_particle* part) 
@@ -242,19 +331,128 @@ void SPH_main::update_particle(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (part->x[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
+			if (part->x_half[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
 			{
-				part->v[k] = abs(part->v[k] + dt * part->a[k]);
+				part->v[k] = abs(part->v_half[k] + dt * part->a[k]);
 			}
-			else if(part->x[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
-				part->v[k] = -abs(part->v[k] + dt * part->a[k]);
+			else if(part->x_half[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
+				part->v[k] = -abs(part->v_half[k] + dt * part->a[k]);
 			}
 			else {
-				part->x[k] = part->x[k] + dt * part->v[k];
-				part->v[k] = part->v[k] + dt * part->a[k];
+				part->x[k] = part->x_half[k] + dt * part->v[k];
+				part->v[k] = part->v_half[k] + dt * part->a[k];
 			}
 		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
 	}
-	part->rho = part->rho + part->D * dt;
+
+	part->rho = part->rho_half + part->D * dt;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+
+	part->D = 0.0;
+}
+
+
+void SPH_main::reset_grid_count()
+{
+	for (auto& temp : grid_count) fill(temp.begin(), temp.end(), 0);
+
+}
+
+void SPH_main::update_rho(SPH_particle* part)
+{
+	if (part->rho2 != 0) 
+	{
+		part->rho = part->rho2;
+	}
+	part->rho2 = 0;
+	part->numerator = 0.0;
+	part->denominator = 0.0;
+}
+
+
+void SPH_main::store_initial(SPH_particle* part)
+{
+	part->rho_half = part->rho;
+	part->v_half[0] = part->v[0];
+	part->v_half[1] = part->v[1];
+	part->x_half[0] = part->x[0];
+	part->x_half[1] = part->x[1];
+
+}
+
+void SPH_main::full_update(SPH_particle* part)
+{
+	if (!part->is_boundary)
+	{
+		for (int k = 0; k < 2; k++)
+		{
+			if (2 * part->x[k] - part->x_half[k] < min_x[k] + 2.0 * h)
+			{
+				part->v[k] = abs(2 * part->v[k] - part->v_half[k]);
+			}
+			else if(2 * part->x[k] - part->x_half[k] > max_x[k] - 2.0 * h){
+				part->v[k] = -abs(2 * part->v[k] - part->v_half[k]);
+			}
+			else {
+				part->x[k] = 2 * part->x[k] - part->x_half[k];
+				part->v[k] = 2 * part->v[k] - part->v_half[k];
+			}
+			part->a_half[k] = part->a[k];
+		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
+	}
+
+	part->rho = 2 * part->rho - part->rho_half;
+	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+
+	part->D = 0.0;
+}
+
+
+void SPH_main::time_dynamic()
+{
+	if (v_max != 0) dt_cfl = (h / v_max);
+	if (a_max != 0) dt_a = sqrt(h / a_max);
+	if (rho_max != 0) dt_f = h / (c0 * sqrt(pow((rho_max / rho0), gamma - 1)));
+
+	if (dt_cfl <= dt_a && dt_cfl <= dt_f && dt_cfl != 0)
+	{
+		dt = cfl * dt_cfl;
+	}
+	else if (dt_a <= dt_cfl && dt_a <= dt_f && dt_a != 0)
+	{
+		dt = cfl * dt_a;
+	}
+	else if (dt_f <= dt_a && dt_f <= dt_a && dt_f != 0)
+	{
+		dt = cfl * dt_f;
+	}
+	dt_f = 0;
+	dt_a = 0;
+	dt_cfl = 0;
+}
+
+void SPH_main::get_new_max(SPH_particle* part)
+{
+	double temp_vv = 0;
+	double temp_aa = 0;
+
+	if (!part->is_boundary) 
+	{
+		temp_vv = part->vij_half[0];
+		temp_aa = sqrt(part->a_half[0] * part->a_half[0] + part->a_half[1] * part->a_half[1]);
+		if (v_max < temp_vv) v_max = temp_vv;
+		if (a_max < temp_aa) a_max = temp_aa;
+		if (rho_max < part->rho) rho_max = part->rho;
+	}
+
+
+	
 }
