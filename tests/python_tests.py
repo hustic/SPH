@@ -20,8 +20,10 @@ def test_read_keys():
         '''
         Test if the post.py is producing .h5 file correctly
         '''
+        print("okay")
         hdf = pd.HDFStore('tests/output_test.h5', mode = 'r')
-        df = hdf.get('/s00001')
+        key = hdf.keys()[0]
+        df = hdf.get(key)
         assert list(df.keys()) == ['x', 'y', 'z', 'vel_x', 'vel_y', 'vel_z', 'pressure', 
                                 'types','density'], "keys assert failed"
         hdf.close()
