@@ -124,3 +124,52 @@ the /SPH_main/ class. Namely /cubic_spline/, /cubic_spline_first_derivative/ and
 possible outputs of the spline functions. Note, that the same principle is
 applied for /update_gradients/ as the cubic spline functions play an important
 role in the calculation of acceleration and rate of change of pressure.
+Moreover, the tests are conducted independently of the model parameters (as they
+are defined in the /set_vales/ functions), by setting the desired parameters
+before the function call.
+** Python Testing
+The Python part of the testing deals with validating the behaviour of the
+simulator; checking that the particles stay within the boundaries and that the
+particles are present at their proper positions after /N/ iterations steps. This
+part of the testing can be used for validating that the input parameters by the
+user fall within the power of the simulator (ie that the simulator does not
+become unstable).
+** Testing pipeline
+The teting pipeline goes as follows:
+1. The objects and C++ classes get compiled.
+2. The Python script /run_tests.py/ is being run, which is responsible for
+   running both the C++ and Python tests.
+3. The C++ test file /test_SPH_2D.cpp/ is run, followed by
+   /test_file_writer.cpp/ which outputs a set of /.vtp/ files, containing the
+   iteration steps of the test simulator.
+4. /test_post.py/ is called (a specialised version of /post.py/) which processes
+   the /.vtp/ files and creates the /output_test.h5/ file, containing all the
+   Pandas DataFrames to be used by the Python part of the tests.
+5. /python_tests.py/ is run with /output_test.h5/ as input; completing a number
+   of tests on the behaviour of the simulator.
+
+*Note: The following commands are to be entered from the base repository of the package.*
+The complete testing pipeline can be run by using:
+#+BEGIN_SRC bash
+make runtests
+#+END_SRC
+
+To run only the C++ tests you can use:
+#+BEGIN_SRC bash
+./tests/bin/test_SPH_2D
+#+END_SRC
+The /--log_level=unit_scope/ flag can be used to give a detailed report of the
+testing suite and /--list_content/ provides the user for a description of each
+testing case for easier debugging.
+
+To produce the /.vtp/ files you can use:
+#+BEGIN_SRC bash
+./tests/bin/test_file_writer
+#+END_SRC
+
+To produce the /.h5/ test files you can use:
+#+BEGIN_SRC bash
+python ./tests/test_post.py
+#+END_SRC
+(It goes without saying that the /.vtp/ files need to already exist for the
+/.h5/ files to be produced.)
