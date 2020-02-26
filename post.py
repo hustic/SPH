@@ -8,9 +8,8 @@ import numpy as np
 import sys
 
 
-hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
-
-files = sorted(glob.glob(sys.argv[1]+'*'))
+files = sorted(glob.glob(sys.argv[1]+'*'+'.vtp'))
+print(files)
 iters = []
 for f in files:
     doc = etree.parse(f)
@@ -53,7 +52,8 @@ for f in files:
     df['types'] = types
     df['density'] = density
     iters.append(df)
-    
+  
+hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
 for i in range(len(iters)):
     #iters[i].to_hdf(sys.argv[1]+'.h5',key='s'+str(i), mode='w')
     hdf.put('s'+str(i), iters[i])
