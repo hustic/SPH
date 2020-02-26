@@ -1,5 +1,7 @@
 #+TITLE: Documentation
 
+#+OPTIONS: toc:nil
+
 This tool has been implemented in C++ with Python as a means to analyze data and
 test the output of the code. Bellow is the documentation of the functions used
 in the tool and an analysis of the testing pipline.
@@ -12,6 +14,7 @@ simulation and holds parameters and values that are specific to every particle
 is using and holds all the functions, globals and data strucutres needed to run
 the simulation.
 
+#+TOC: headlines 2
 ** /SPH_particle/
 **** TODO Include complete descriptions of class variables
 
@@ -80,7 +83,7 @@ For dynamic time stepping
 - set_values(/double delta_x/) (void) :: Setting simulation parameters.
 - initialize_grid(/void/) (void) ::
 - place_points(/double min0/, /double min1/, /double max0/, /double max1/, /bool
-  type/) (void) ::
+type/) (void) ::
 - allocate_to_grid(/void/) (void) :: Allocates all the points to the search grid
   (assumes that index has been appropriately update).
 - neighbour_iterate(/SPH_particle* part/) (void) ::
