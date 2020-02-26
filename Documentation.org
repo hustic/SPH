@@ -82,8 +82,7 @@ For dynamic time stepping
 - density_field_smoothing(/SPH_particle* part/) (void) ::
 - set_values(/double delta_x/) (void) :: Setting simulation parameters.
 - initialize_grid(/void/) (void) ::
-- place_points(/double min0/, /double min1/, /double max0/, /double max1/, /bool
-type/) (void) ::
+- place_points(/double min0/, /double min1/, /double max0/, /double max1/, /bool type/) (void) ::
 - allocate_to_grid(/void/) (void) :: Allocates all the points to the search grid
   (assumes that index has been appropriately update).
 - neighbour_iterate(/SPH_particle* part/) (void) ::
@@ -94,3 +93,34 @@ type/) (void) ::
 - time_dynamic() (void) ::
 - full_update(/SPH_particle* part/) (void) ::
 - get_new_max(/SPH_particle* part/) (void) ::
+
+* Running the Simulation, Post-processing and Output scripts
+A sample C++ file (/SPH_Snippet.cpp/) has been provided in the package that runs
+the simulation for the parameters required for the class excericse. That file is
+responsible for the entirety of the simulation and serves as a template for any
+future simulations anyone would want to run using this tool. Moreover, a
+number of post processing scripts have been implemented in C++ and Python for
+the purpose of outputing the simulation states in a suitable format for both
+visualization and data manipulation.
+
+** file_writer.cpp
+A simple C++ file that outputs simulation steps as /.vtp/ files; to be used with
+ParaView or other software that is build upon the /VTK/ library.
+** post.py
+A simple Python script that takes the /.vtp/ files created by /file_writer.cpp/,
+creates a Pandas DataFrame for every iteration step and outputs them in a HDF5
+file (for easy data transport and data manipulation). A similar version of the
+script is used in the testing pipeline in the step where the testing moves from
+C++ to Python.
+
+* Testing
+Testing on this tool is done by both C++ and Python. For C++ the BOOST library
+is used and for Python a custom test file has been written.
+
+** C++ Testing
+The C++ side of the testing handles all the mathematical functions defined in
+the /SPH_main/ class. Namely /cubic_spline/, /cubic_spline_first_derivative/ and
+/update_gradients/. A set of BOOST test cases has been set that depends on the
+possible outputs of the spline functions. Note, that the same principle is
+applied for /update_gradients/ as the cubic spline functions play an important
+role in the calculation of acceleration and rate of change of pressure.
