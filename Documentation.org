@@ -37,7 +37,7 @@ the simulation.
 - is_boundary (bool) :: Set true if the particle is part of the boundary
 
 *** Class functions:
-- calc_index(void) (void) ::
+- calc_index(/void/) (void) ::
 ** /SPH_main/
 
 **** TODO Include complete descriptions of class variables and functions
@@ -68,5 +68,26 @@ For dynamic time stepping
 - grid_count (vector<vector<int>>) ::
 - max_list[] (int) ::
 - particle_list (vector<SPH_particle>) :: List of all the particles
-- search_grid ()<vector<vector<vector<SPH_particle*>>>) :: Outer two vectors are
+- search_grid (<vector<vector<vector<SPH_particle*>>>) :: Outer two vectors are
   the grid, inner vector is the list.
+
+*** Class functions:
+- SPH_main() :: Main constructor.
+- cubic_spline(/double r[]/) (double) ::
+- cubic_spline_first_derivative(/double r[]/) (double) ::
+- update_gradients(/double r[]/, /SPH_particle* part/, /SPH_particle* other_part/) (void) ::
+- density_field_smoothing(/SPH_particle* part/) (void) ::
+- set_values(/double delta_x/) (void) :: Setting simulation parameters.
+- initialize_grid(/void/) (void) ::
+- place_points(/double min0/, /double min1/, /double max0/, /double max1/, /bool
+  type/) (void) ::
+- allocate_to_grid(/void/) (void) :: Allocates all the points to the search grid
+  (assumes that index has been appropriately update).
+- neighbour_iterate(/SPH_particle* part/) (void) ::
+- update_particle(/SPH_particle* part/) (void) ::
+- reset_grid_count() (void) ::
+- update_rho(/SPH_particle* part/) (void) ::
+- store_initial(/SPH_particle* part/) (void) ::
+- time_dynamic() (void) ::
+- full_update(/SPH_particle* part/) (void) ::
+- get_new_max(/SPH_particle* part/) (void) ::
