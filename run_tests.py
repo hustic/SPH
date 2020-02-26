@@ -38,6 +38,7 @@ for name, attr in tests.python_tests.__dict__.items():
             print("Test %s passed" %name)
         except Exception:
             print("Test %s failed" %name)
+            print(attr())
             glob_fail = True
             
 if glob_fail:
