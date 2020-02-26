@@ -118,10 +118,6 @@ BOOST_AUTO_TEST_CASE(TestGradientLess, * description("Distance between 0 and 1")
     BOOST_TEST(res == p1->D, tt::tolerance(0.0001));
     BOOST_TEST(0 == p1->a[1], tt::tolerance(0.0001));
     
-    std::cout << p1->D << " " << p1->a[0] << std::endl;
-    
-    std::cout << 2 * (10 * (-3 * 0.5 + 2.25 * 1/4) / (7 * M_PI)) << std::endl;
-    
     delete p1;
     delete p2;
     
@@ -138,7 +134,7 @@ BOOST_AUTO_TEST_CASE(TestGradientGreater, * description("Distance between 1 and 
     domain.mu = 1.;
     
     p1->v[0] = 1.;
-    p1->v[1] = 0.;
+    p1->v[1] = 1.;
     p1->rho = 1.;
     p1->P = 1.;
     p1->a[0] = 0.;
@@ -159,16 +155,12 @@ BOOST_AUTO_TEST_CASE(TestGradientGreater, * description("Distance between 1 and 
     
     double res = -10 * 0.75 / (7 * M_PI);
     
-    BOOST_TEST(2 * res == p1->a[0], tt::tolerance(0.0001));
+    BOOST_TEST(2 * res == p1->a[1], tt::tolerance(0.0001));
     BOOST_TEST(res == p1->D, tt::tolerance(0.0001));
-    BOOST_TEST(0 == p1->a[1], tt::tolerance(0.0001));
+    BOOST_TEST(0 == p1->a[0], tt::tolerance(0.0001));
     
-    std::cout << p1->D << " " << p1->a[0] << std::endl;
-    
-    std::cout << 2 * (-10 * 0.75 / (7 * M_PI)) << std::endl;
-    
-    
-    
+    delete p1;
+    delete p2;
     // Need to check a and D
 }
 
@@ -197,23 +189,14 @@ BOOST_AUTO_TEST_CASE(TestGradinetOutside, * description("Distance outside the sp
     p1->a[1] = 0.;
     
     
-    double dn[2] = {0.5 , 0};
+    double dn[2] = {2 , 1};
     
     domain.update_gradients(dn, p1, p2);
     
-    double res = (10 * (-3 * 0.5 + 2.25 * 1/4) / (7 * M_PI));
-    
-    BOOST_TEST(2 * res == p1->a[0], tt::tolerance(0.0001));
-    BOOST_TEST(res == p1->D, tt::tolerance(0.0001));
+    BOOST_TEST(0 == p1->a[0], tt::tolerance(0.0001));
+    BOOST_TEST(0 == p1->D, tt::tolerance(0.0001));
     BOOST_TEST(0 == p1->a[1], tt::tolerance(0.0001));
     
-    std::cout << p1->D << " " << p1->a[0] << std::endl;
-    
-    std::cout << 2 * (10 * (-3 * 0.5 + 2.25 * 1/4) / (7 * M_PI)) << std::endl;
-    
-    
-    
-    // Need to check a and D
 }
 
 BOOST_AUTO_TEST_SUITE_END();
