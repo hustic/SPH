@@ -56,7 +56,7 @@ for f in files:
 hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
 for i in range(len(iters)):
     #iters[i].to_hdf(sys.argv[1]+'.h5',key='s'+str(i), mode='w')
-    hdf.put('s'+str(i), iters[i])
+    hdf.put('s'+"{:05d}".format(i), iters[i])
 
 hdf.close()
     
