@@ -19,6 +19,7 @@ int main(void)
 	ifstream myfile("input.txt");
 	string line;
 	double t_total, t_print, delta_x;
+	bool analyse_mode;
 	vector<vector<double>> areas;
 	vector<bool> particle_type;
 	if (myfile.is_open())
@@ -29,6 +30,8 @@ int main(void)
 		t_print = stod(line);
 		getline(myfile, line);
 		delta_x = stod(line);
+		getline(myfile, line);
+		analyse_mode = (line == "1");
 
 		while (getline(myfile, line))
 		{
