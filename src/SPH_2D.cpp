@@ -151,7 +151,7 @@ void SPH_main::set_values(void)
 	max_x[0] = 20.0;
 	max_x[1] = 10.0;
 
-	dx = 0.1;
+	dx = 0.2;
 	c0 = 20;
 
 	mu = 0.001;
@@ -162,7 +162,7 @@ void SPH_main::set_values(void)
 	h_fac = 1.3;
 
 	h = dx*h_fac;
-	dt = 0.1 * h / c0;
+	dt = 0.5 * 0.1 * h / c0;
 
 	gamma = 7.0;
 	B = c0 * c0 * rho0 / gamma;
@@ -318,16 +318,16 @@ void SPH_main::update_particle(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (part->x[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
+			if (part->x_half[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
 			{
-				part->v[k] = abs(part->v[k] + dt * part->a[k]);
+				part->v[k] = abs(part->v_half[k] + dt * part->a[k]);
 			}
-			else if(part->x[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
-				part->v[k] = -abs(part->v[k] + dt * part->a[k]);
+			else if(part->x_half[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
+				part->v[k] = -abs(part->v_half[k] + dt * part->a[k]);
 			}
 			else {
-				part->x[k] = part->x[k] + dt * part->v[k];
-				part->v[k] = part->v[k] + dt * part->a[k];
+				part->x[k] = part->x_half[k] + dt * part->v[k];
+				part->v[k] = part->v_half[k] + dt * part->a[k];
 			}
 		}
 		for (int n = 0; n < 2; n++)
@@ -336,12 +336,10 @@ void SPH_main::update_particle(SPH_particle* part)
 		}
 	}
 
-	part->rho = part->rho + part->D * dt;
+	part->rho = part->rho_half + part->D * dt;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
 
 	part->D = 0.0;
-	part->numerator = 0.0;
-	part->denominator = 0.0;
 }
 
 
@@ -357,4 +355,52 @@ void SPH_main::update_rho(SPH_particle* part)
 		part->rho = part->rho2;
 	}
 	part->rho2 = 0;
+	part->numerator = 0.0;
+	part->denominator = 0.0;
+}
+
+
+void SPH_main::store_initial(SPH_particle* part)
+{
+	part->rho_half = part->rho;
+	part->v_half[0] = part->v[0];
+	part->v_half[1] = part->v[1];
+	part->x_half[0] = part->x[0];
+	part->x_half[1] = part->x[1];
+}
+
+void SPH_main::full_update(SPH_particle* part)
+{
+	if (!part->is_boundary)
+	{
+		for (int k = 0; k < 2; k++)
+		{
+			if (2 * part->x[k] - part->x_half[k] < min_x[k] + 2.0 * h)
+			{
+				part->v[k] = abs(2 * part->v[k] - part->v_half[k]);
+			}
+			else if(2 * part->x[k] - part->x_half[k] > max_x[k] - 2.0 * h){
+				part->v[k] = -abs(2 * part->v[k] - part->v_half[k]);
+			}
+			else {
+				part->x[k] = 2 * part->x[k] - part->x_half[k];
+				part->v[k] = 2 * part->v[k] - part->v_half[k];
+			}
+		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
+	}
+
+	part->rho = 2 * part->rho - part->rho_half;
+	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+
+	part->D = 0.0;
+}
+
+
+void SPH_main::time_step_set(SPH_particle* part)
+{
+
 }

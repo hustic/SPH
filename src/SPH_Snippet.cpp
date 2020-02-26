@@ -32,6 +32,29 @@ int main(void)
 	for (int iter = 1; iter < 10000; iter++) {
 
 		// cout << "iter = " << iter << endl;
+		// first half step
+		for (int j = 0; j < domain.max_list[1]; j++)
+		{
+			for (int i = 0; i < domain.max_list[0]; i++)
+			{
+				for (int k = 0; k < domain.search_grid[i][j].size(); k++)
+				{
+					domain.store_initial(domain.search_grid[i][j][k]);
+					domain.neighbour_iterate(domain.search_grid[i][j][k]);
+				}
+			}
+		}
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.update_particle(&domain.particle_list[i]);
+
+		domain.reset_grid_count();
+
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.particle_list[i].calc_index();
+
+		domain.allocate_to_grid();								//update grid index of each particle
+		
+		// first full step
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
 			for (int i = 0; i < domain.max_list[0]; i++)
@@ -46,7 +69,16 @@ int main(void)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle(&domain.particle_list[i]);
 
+		// last full step
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.full_update(&domain.particle_list[i]);
+		
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.particle_list[i].calc_index();
+
+		domain.allocate_to_grid();								//update grid index of each particle
 		domain.reset_grid_count();
+		
 		if (iter % 10 == 0) {
 			// cout << "Density field smoothed at iter = " << iter << endl;
 			for (int j = 0; j < domain.max_list[1]; j++)
@@ -65,14 +97,9 @@ int main(void)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_rho(&domain.particle_list[i]);
 		}
-
-		for (int i = 0; i < domain.particle_list.size(); i++)
-			domain.particle_list[i].calc_index();
-
 		domain.reset_grid_count();
-		domain.allocate_to_grid();								//update grid index of each particle
 		
-		if (iter % 50 == 0)
+		if (iter % 100 == 0)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";		
