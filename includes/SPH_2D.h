@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -16,6 +17,16 @@ public:
 	double rho, P;					//density and pressure
 	double a[2];					//acceleration
 	double D;						//rate of change of density
+	double rho2 = 0;
+	double vij_half[2];
+
+	double x_half[2], v_half[2];		//position and velocity
+	double rho_half;					//density and pressure
+	double a_half[2];					//acceleration
+	double D_half;						//rate of change of density
+
+	double numerator = 0;
+	double denominator = 0;
 
 	static SPH_main* main_data;		//link to SPH_main class so that it can be used in calc_index
 
@@ -43,7 +54,13 @@ public:
 
 	void neighbour_iterate(SPH_particle* part);
 	void update_particle(SPH_particle* part);
-
+	void reset_grid_count();
+	void update_rho(SPH_particle* part);
+	void store_initial(SPH_particle* part);
+	void time_dynamic();
+	void full_update(SPH_particle* part);
+	void get_new_max(SPH_particle* part);
+    
 	double h;								//smoothing length
 	double h_fac;
 	double dx;								//particle initial spacing
@@ -58,7 +75,18 @@ public:
 	double gamma;
 	double mass;
 
+	// for dynamic time stepping
+	double v_max;
+	double a_max;
+	double rho_max;
+	double dt_cfl;
+	double dt_f;
+	double dt_a;
+	double cfl;
+
 	double min_x[2], max_x[2];				//dimensions of simulation region
+
+	vector<vector<int>> grid_count;
 
 	int max_list[2];
 
