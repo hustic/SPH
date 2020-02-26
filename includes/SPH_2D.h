@@ -16,7 +16,12 @@ public:
 	double rho, P;					//density and pressure
 	double a[2];					//acceleration
 	double D;						//rate of change of density
-	double rho2 = 0;;
+	double rho2 = 0;
+
+	double x_half[2], v_half[2];		//position and velocity
+	double rho_half;					//density and pressure
+	double a_half[2];					//acceleration
+	double D_half;						//rate of change of density
 
 	double numerator = 0;
 	double denominator = 0;
@@ -49,6 +54,9 @@ public:
 	void update_particle(SPH_particle* part);
 	void reset_grid_count();
 	void update_rho(SPH_particle* part);
+	void store_initial(SPH_particle* part);
+	void time_step_set(SPH_particle* part);
+	void full_update(SPH_particle* part);
     
 	double h;								//smoothing length
 	double h_fac;
