@@ -4,8 +4,13 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+
+using namespace std;
 
 SPH_main domain;
+
+void file_out(SPH_particle* part, int ite);
 
 int main(void)
 {
@@ -14,51 +19,99 @@ int main(void)
 
 	//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
 	domain.place_points(-0.52, -0.52, 0.0, 10.52);				//left boundary
-	domain.place_points(0.0, -0.52, 20.0, 0.0);				//top boundary
+	domain.place_points(0.0, 10, 20.0, 10.52);				//top boundary
 	domain.place_points(20.0, -0.52, 20.52, 10.52);				//right boundary
-	domain.place_points(0.0, 5.0, 3.0, 10.52);
-	domain.place_points(3.0, 8.0, 20.0, 10.52);
-
-	domain.allocate_to_grid();									//needs to be called for each time step
+	domain.place_points(0.0, -0.52, 3.0, 5.0);
+	domain.place_points(3.0, -0.52, 20.0, 2.0);
+	domain.time_dynamic();
+	domain.allocate_to_grid();
 
 	stringstream name;
-	name << "initial_configuration.vtp";
-
-	
+	name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
 	write_file(name.str().c_str(), &domain.particle_list);
-	/*
-	
-	for (int iter = 1; iter < 30; iter++) {
-		cout << "iter = " << iter << endl;
-		for (int i = 0; i < domain.particle_list.size(); i++)
-		{
-			if (domain.particle_list[i].x[0] < domain.min_x[0] || domain.particle_list[i].x[1] < domain.min_x[1])
-				cout << "out of min range" << endl;
-			else if (domain.particle_list[i].x[0] > domain.max_x[0] || domain.particle_list[i].x[1] > domain.max_x[1])
-				cout << "out of max range" << endl;
+	for (int iter = 1; iter < 10000; iter++) {
 
-				domain.neighbour_iterate(&domain.particle_list[i]);
+		// cout << "iter = " << iter << endl;
+		// first half step
+		for (int j = 0; j < domain.max_list[1]; j++)
+		{
+			for (int i = 0; i < domain.max_list[0]; i++)
+			{
+				for (int k = 0; k < domain.search_grid[i][j].size(); k++)
+				{
+					domain.store_initial(domain.search_grid[i][j][k]);
+					domain.neighbour_iterate(domain.search_grid[i][j][k]);
+				}
+			}
 		}
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle(&domain.particle_list[i]);
-		if (iter % 10 == 0) {
-			cout << "Density field smoothed at iter = " << iter << endl;
-			for (int i = 0; i < domain.particle_list.size(); i++)
-				domain.density_field_smoothing(&domain.particle_list[i]);
-		}
+
+		domain.reset_grid_count();
+
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
 		domain.allocate_to_grid();								//update grid index of each particle
 		
-		stringstream name;
-        name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";
-		
+		// first full step
+		for (int j = 0; j < domain.max_list[1]; j++)
+		{
+			for (int i = 0; i < domain.max_list[0]; i++)
+			{
+				for (int k = 0; k < domain.search_grid[i][j].size(); k++)
+				{
+					domain.neighbour_iterate(domain.search_grid[i][j][k]);
+				}
+			}
+		}
 
-		write_file(name.str().c_str(), &domain.particle_list);
+		// last full step
+		for (int i = 0; i < domain.particle_list.size(); i++)
+		{
+			domain.update_particle(&domain.particle_list[i]);
+			domain.full_update(&domain.particle_list[i]);
+		}
 		
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.particle_list[i].calc_index();
+
+		domain.allocate_to_grid();								//update grid index of each particle
+		domain.reset_grid_count();
+		
+		if (iter % 10 == 0) {
+			// cout << "Density field smoothed at iter = " << iter << endl;
+			for (int j = 0; j < domain.max_list[1]; j++)
+			{
+				for (int i = 0; i < domain.max_list[0]; i++)
+				{
+					for (int k = 0; k < domain.search_grid[i][j].size(); k++)
+					{
+						domain.density_field_smoothing(domain.search_grid[i][j][k]);
+					}
+				}
+			}
+		}
+		if (iter % 10 == 0) 
+		{
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.update_rho(&domain.particle_list[i]);
+		}
+		domain.reset_grid_count();
+		
+		// get the max for minimum dynamic time step
+		for (int i = 0; i < domain.particle_list.size(); i++)
+			domain.get_new_max(&domain.particle_list[i]);
+
+		// get new dynamic time step
+		domain.time_dynamic();
+
+		if (iter % 50 == 0)
+		{
+			stringstream name;
+			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << iter << ".vtp";		
+			write_file(name.str().c_str(), &domain.particle_list);
+		}
 	}
-	*/
-	
 	return 0;
 }
