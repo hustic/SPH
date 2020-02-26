@@ -12,19 +12,12 @@ namespace tt=boost::test_tools;
 
 SPH_main domain;
 
-int values[] = {};
-
 
 BOOST_AUTO_TEST_SUITE(DomainConstructor);
 
-BOOST_AUTO_TEST_CASE(TestDomainValues)
-{
-    domain.set_values();										//Set simulation parameters
-    BOOST_TEST(true);
-}
-
 BOOST_AUTO_TEST_CASE(TestInitialiseGrid)
 {
+    domain.set_values();
     domain.initialise_grid();									//initialise simulation grid
     BOOST_TEST(domain.search_grid.size() == domain.max_list[0]);
     for (int i = 0; i < domain.max_list[0]; i++)
@@ -37,17 +30,18 @@ BOOST_AUTO_TEST_SUITE(TestSplineFunctions, * description("Testsing Cubic Spline 
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineLess,  * description("Distance between 0 and 1"))
 {
-    domain.h = 1
-    double dn[2] = { 1/2 , 1/2 };
-    double q = sqrt(dn[0] * dn[0] + dn[1] * dn[1]);
+    domain.h = 1.;
+    double dn[2] = { 1/2 , 0. };
+    double q = double(sqrt(dn[0] * dn[0] + dn[1] * dn[1]));
+    std::cout << q << std::endl;
     double tres = domain.cubic_spline(dn);
-    double res = 10.0 * (1.0 - 1.5 * q * q + 0.75 * pow(q, 3)) / (7.0 * M_PI);
+    double res = 10.0 * (1.0 - 1.5 * 1/4 + 0.75 * 1/8) / (7.0 * M_PI);
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
 }
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineGreater, * description("Distance between 1 and 2"))
 {
-    domain.h = 1;
+    domain.h = 1.;
     double dn[2] = {1, 0};
     double tres = domain.cubic_spline(dn);
     double res = 10  * 0.25 / (7 * M_PI);
