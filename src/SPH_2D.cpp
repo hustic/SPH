@@ -166,7 +166,7 @@ void SPH_main::set_values(double delta_x)
 	mass = rho0 * dx * dx;
 	h_fac = 1.3;
 
-	cfl = 0.2;
+	cfl = 0.1;
 
 	a_max = -g[1];
 	v_max = 0;
@@ -184,8 +184,8 @@ void SPH_main::initialise_grid(void)
 {
 	for (int i = 0; i < 2; i++)
 	{
-		min_x[i] -= 2.0 * h;
-		max_x[i] += 2.0 * h; //add buffer for virtual wall particles
+		min_x[i] -= 3.0 * dx;
+		max_x[i] += 3.0 * dx; //add buffer for virtual wall particles
 
 		max_list[i] = int((max_x[i] - min_x[i]) / (2.0 * h) + 1.0);
 	}
@@ -221,16 +221,6 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 			particle.P = 0.0;
 
 			particle.is_boundary = type;
-
-			/*particle.is_boundary = false;
-			for (int i = 0; i < 2; i++)
-			{
-				if (particle.x[i] < min_x[i] + 2.0 * h || particle.x[i] >= max_x[i] - 2.0 * h)
-				{
-					particle.is_boundary = true;
-					break;
-				}
-			}*/
 			
 			particle.calc_index();
 
@@ -433,9 +423,17 @@ void SPH_main::time_dynamic()
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_f <= dt_a && dt_f <= dt_cfl && dt_f != 0)
+	else if (dt_a <= dt_f && dt_a != 0 && dt_cfl == 0)
+	{
+		dt = cfl * dt_a;
+	}
+	else if (dt_f != 0)
 	{
 		dt = cfl * dt_f;
+	}
+	else
+	{
+		dt = 0.5 * 0.1 * h / c0;
 	}
 	dt_f = 0;
 	dt_a = 0;

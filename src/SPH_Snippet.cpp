@@ -18,7 +18,7 @@ int main(void)
 	//parse the input configuration file
 	ifstream myfile("input.txt");
 	string line;
-	double t_total, t_frame, delta_x;
+	double t_total, t_print, delta_x;
 	vector<vector<double>> areas;
 	vector<bool> particle_type;
 	if (myfile.is_open())
@@ -26,7 +26,7 @@ int main(void)
 		getline(myfile, line);
 		t_total = stod(line);
 		getline(myfile, line);
-		t_frame = stod(line);
+		t_print = stod(line);
 		getline(myfile, line);
 		delta_x = stod(line);
 
@@ -44,14 +44,11 @@ int main(void)
 			string type = line.substr(previous, line.length() - previous);
 			particle_type.push_back(type == "1");
 		}
-		for (int i = 0; i < areas.size(); i++) {
-			for (int j = 0; j < areas[i].size(); j++)
-				cout << areas[i][j];
-			cout << '\n' << particle_type[i] << endl;
-		}
 	}
-	else cout << "Unable to open input configuration file" << endl;
-
+	else {
+		cout << "Unable to open input configuration file" << endl;
+		return -1;
+	}
 
 	domain.set_values(delta_x);									//Set simulation parameters
 	domain.initialise_grid();									//initialise simulation grid
@@ -67,14 +64,15 @@ int main(void)
 	name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
 	write_file(name.str().c_str(), &domain.particle_list);
 
-	double t_max = 30;
+	double t_max = t_total;
 	double t = 0;
 	t += domain.dt;
 	int count = 1;
 	double dt_print = 0;
-
+	
 	while (t < t_max)
 	{
+		cout << "t = " << t << endl;
 		// first half step
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
@@ -150,7 +148,7 @@ int main(void)
 		domain.time_dynamic();
 
 		dt_print += domain.dt;
-		if (dt_print >= 0.1)
+		if (dt_print >= t_print)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/0.1) << ".vtp";		
@@ -160,5 +158,6 @@ int main(void)
 		t += domain.dt;
 		count++;
 	}
+	
 	return 0;
 }
