@@ -30,6 +30,7 @@ for f in files:
     velocity = datas[5].strip().split(" ")
     types = datas[8].strip().split(" ")
     density = datas[11].strip().split(" ")
+    spacingDensity = datas[14].strip().split(" ")
 
     vel = []
     for t in zip(*[iter(velocity)]*3):
@@ -44,6 +45,9 @@ for f in files:
     den = []
     for t in density:
         den.append(float(t))
+    sd = []
+    for t in spacingDensity:
+        sd.append(float(t))
     
 #print(position)
     df = pd.DataFrame(pos, columns=['x', 'y', 'z'])
@@ -51,6 +55,7 @@ for f in files:
     df['pressure'] = press
     df['types'] = types
     df['density'] = density
+    df['spacingDensity'] = sd
     iters.append(df)
   
 hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
