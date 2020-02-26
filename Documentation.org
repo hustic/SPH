@@ -13,7 +13,7 @@ is using and holds all the functions, globals and data strucutres needed to run
 the simulation.
 
 ** /SPH_particle/
-* TODO Include complete descriptions of class variables
+**** TODO Include complete descriptions of class variables
 
 *** Class variables:
 - x[] (double) :: Position
@@ -38,4 +38,35 @@ the simulation.
 
 *** Class functions:
 - calc_index(void) (void) ::
+** /SPH_main/
 
+**** TODO Include complete descriptions of class variables and functions
+*** Class variables:
+- h (double) :: Smoothing length
+- h_fac (double) ::
+- dx (double) :: Particles initial spacing
+- c0 (double) :: Speed of sound
+- dt (double) :: Timestep
+- g[] (double) :: Gravity constant
+- mu (double) :: Viscocity
+- rho0 (double) :: Initial density
+- B (double) ::
+- gamma (double) ::
+- mass (double) ::
+
+For dynamic time stepping
+
+- v_max (double) ::
+- a_max (double) ::
+- rho_max (double) ::
+- dt_cfl (double) ::
+- dt_f (double) ::
+- dt_a (double) ::
+- cfl (double) ::
+
+- min_x[], max_x[] (double) :: Dimensions of simulation region
+- grid_count (vector<vector<int>>) ::
+- max_list[] (int) ::
+- particle_list (vector<SPH_particle>) :: List of all the particles
+- search_grid ()<vector<vector<vector<SPH_particle*>>>) :: Outer two vectors are
+  the grid, inner vector is the list.
