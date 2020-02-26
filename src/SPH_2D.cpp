@@ -156,7 +156,7 @@ void SPH_main::set_values(void)
 
 	mu = 0.001;
 	g[0] = 0.0;
-	g[1] = 9.81;
+	g[1] = -9.81;
 	rho0 = 1000;
 	mass = rho0 * dx * dx;
 	h_fac = 1.3;
