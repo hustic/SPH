@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -14,15 +15,51 @@ void file_out(SPH_particle* part, int ite);
 
 int main(void)
 {
-	domain.set_values();										//Set simulation parameters
+	//parse the input configuration file
+	ifstream myfile("input.txt");
+	string line;
+	double t_total, t_print, delta_x;
+	bool analyse_mode;
+	vector<vector<double>> areas;
+	vector<bool> particle_type;
+	if (myfile.is_open())
+	{
+		getline(myfile, line);
+		t_total = stod(line);
+		getline(myfile, line);
+		t_print = stod(line);
+		getline(myfile, line);
+		delta_x = stod(line);
+		getline(myfile, line);
+		analyse_mode = (line == "1");
+
+		while (getline(myfile, line))
+		{
+			vector<double> this_area;
+			size_t current, previous = 0;
+			current = line.find(' ');
+			while (current != string::npos) {
+				this_area.push_back(stod(line.substr(previous, current - previous)));
+				previous = current + 1;
+				current = line.find(' ', previous);
+			}
+			areas.push_back(this_area);
+			string type = line.substr(previous, line.length() - previous);
+			particle_type.push_back(type == "1");
+		}
+	}
+	else {
+		cout << "Unable to open input configuration file" << endl;
+		return -1;
+	}
+
+	domain.set_values(delta_x);									//Set simulation parameters
 	domain.initialise_grid();									//initialise simulation grid
 
 	//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
-	domain.place_points(-0.52, -0.52, 0.0, 10.52);				//left boundary
-	domain.place_points(0.0, 10, 20.0, 10.52);				//top boundary
-	domain.place_points(20.0, -0.52, 20.52, 10.52);				//right boundary
-	domain.place_points(0.0, -0.52, 3.0, 5.0);
-	domain.place_points(3.0, -0.52, 20.0, 2.0);
+	for (int i = 0; i < areas.size(); i++)
+		domain.place_points(areas[i][0], areas[i][1], areas[i][2], areas[i][3], particle_type[i]);
+
 	domain.time_dynamic();
 	domain.allocate_to_grid();
 
@@ -30,14 +67,15 @@ int main(void)
 	name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
 	write_file(name.str().c_str(), &domain.particle_list);
 
-	double t_max = 30;
+	double t_max = t_total;
 	double t = 0;
 	t += domain.dt;
 	int count = 1;
 	double dt_print = 0;
-
+	
 	while (t < t_max)
 	{
+		cout << "t = " << t << endl;
 		// first half step
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
@@ -114,7 +152,7 @@ int main(void)
 		domain.time_dynamic();
 
 		dt_print += domain.dt;
-		if (dt_print >= 0.1)
+		if (dt_print >= t_print)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/0.1) << ".vtp";		
@@ -124,5 +162,6 @@ int main(void)
 		t += domain.dt;
 		count++;
 	}
+	
 	return 0;
 }
