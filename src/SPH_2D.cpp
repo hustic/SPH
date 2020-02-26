@@ -84,6 +84,7 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 
 	int cnt;
 
+	if (analysisMode) part->rho_spacing = mass / rho0; // set the starting spacing rho0, include the particle itself
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
 		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
@@ -111,6 +112,12 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 
 								other_part->numerator += cubic_spline(dn2);
 								other_part->denominator += cubic_spline(dn2) / part->rho;
+
+								if (analysisMode)
+								{
+									part->rho_spacing += cubic_spline(dn1) * mass / rho0;
+									other_part->rho_spacing += cubic_spline(dn2) * mass / rho0;
+								}
 							}
 						}
 					}
@@ -136,6 +143,11 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 								other_part->numerator += cubic_spline(dn2);
 								other_part->denominator += cubic_spline(dn2) / part->rho;
 
+								if (analysisMode)
+								{
+									part->rho_spacing += cubic_spline(dn1) * mass / rho0;
+									other_part->rho_spacing += cubic_spline(dn2) * mass / rho0;
+								}
 							}
 						}
 						++grid_count[i][j];

@@ -33,6 +33,8 @@ public:
 	int list_num[2];				//index in neighbour finding array
 	bool is_boundary;				//if it is a boundary particle
 	void calc_index(void);
+
+	double rho_spacing = 0;				//spacing density of particle for analysis
 };
 
 
@@ -93,4 +95,6 @@ public:
 	vector<SPH_particle> particle_list;						//list of all the particles
 
 	vector<vector<vector<SPH_particle*> > > search_grid;		//Outer 2 are the grid, inner vector is the list of pointers in each cell
+
+	bool analysisMode;
 };

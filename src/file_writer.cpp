@@ -133,16 +133,22 @@ double get_density(SPH_particle p) {
     return p.rho;
 }
 
-int get_Type(SPH_particle p)
+int get_type(SPH_particle p)
 {
     /* Return type of the particle, either boundary particle = 1 or not*/
 
-    //p.is_boundary = true;
     return p.is_boundary;
 }
 
+double get_spacingDensity(SPH_particle p)
+{
+    /* Return sapace density of each partical*/
+
+    return p.rho_spacing;
+}
+
 int write_file(const char *filename,
-	       std::vector<SPH_particle> *particle_list) {
+	       std::vector<SPH_particle> *particle_list, bool analysisMode) {
 
   /*
     
@@ -161,8 +167,9 @@ int write_file(const char *filename,
   fs << "<PointData>\n";
   fs << scalar_to_string("Pressure", particle_list, get_pressure);
   fs << vector_to_string("Velocity", particle_list, get_velocity);
-  fs << scalar_to_string_int("Type", particle_list, get_Type);
+  fs << scalar_to_string_int("Type", particle_list, get_type);
   fs << scalar_to_string("Density", particle_list, get_density);
+  if (analysisMode) fs << scalar_to_string("SpacingDensity", particle_list, get_spacingDensity);
   fs << "</PointData>\n";
   fs << "<Points>\n";
   fs << vector_to_string("Points", particle_list, get_position);

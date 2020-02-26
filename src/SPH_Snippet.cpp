@@ -55,6 +55,7 @@ int main(void)
 
 	domain.set_values(delta_x);									//Set simulation parameters
 	domain.initialise_grid();									//initialise simulation grid
+	domain.analysisMode = analyse_mode;
 
 	//places initial points - will need to be modified to include boundary points and the specifics of where the fluid is in the domain
 	for (int i = 0; i < areas.size(); i++)
@@ -65,7 +66,7 @@ int main(void)
 
 	stringstream name;
 	name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
-	write_file(name.str().c_str(), &domain.particle_list);
+	write_file(name.str().c_str(), &domain.particle_list, domain.analysisMode);
 
 	double t_max = t_total;
 	double t = 0;
@@ -156,7 +157,7 @@ int main(void)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/0.1) << ".vtp";		
-			write_file(name.str().c_str(), &domain.particle_list);
+			write_file(name.str().c_str(), &domain.particle_list, domain.analysisMode);
 			dt_print = 0;
 		}
 		t += domain.dt;
