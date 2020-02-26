@@ -45,10 +45,10 @@ public:
 	void update_gradients(double r[2], SPH_particle* part, SPH_particle* other_part);
 	void density_field_smoothing(SPH_particle* part);
 
-	void set_values(void);
+	void set_values(double delta_x);
 	void initialise_grid(void);
 
-	void place_points(double min0, double min1, double max0, double max1);
+	void place_points(double min0, double min1, double max0, double max1, bool type);
 
 	void allocate_to_grid(void);			//allocates all the points to the search grid (assumes that index has been appropriately updated)
 

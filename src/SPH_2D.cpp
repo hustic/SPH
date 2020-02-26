@@ -148,7 +148,7 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	}
 }
 
-void SPH_main::set_values(void)
+void SPH_main::set_values(double delta_x)
 {
 	min_x[0] = 0.0;
 	min_x[1] = 0.0;
@@ -156,7 +156,7 @@ void SPH_main::set_values(void)
 	max_x[0] = 20.0;
 	max_x[1] = 10.0;
 
-	dx = 0.2;
+	dx = delta_x;
 	c0 = 20;
 
 	mu = 0.001;
@@ -200,7 +200,7 @@ void SPH_main::initialise_grid(void)
 }
 
 
-void SPH_main::place_points(double min0, double min1, double max0, double max1)
+void SPH_main::place_points(double min0, double min1, double max0, double max1, bool type)
 {
 	double x[2] = { min0, min1 };
 	SPH_particle particle;
@@ -219,7 +219,10 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1)
 			particle.D = 0.0;
 			particle.rho = rho0;
 			particle.P = 0.0;
-			particle.is_boundary = false;
+
+			particle.is_boundary = type;
+
+			/*particle.is_boundary = false;
 			for (int i = 0; i < 2; i++)
 			{
 				if (particle.x[i] < min_x[i] + 2.0 * h || particle.x[i] >= max_x[i] - 2.0 * h)
@@ -227,7 +230,7 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1)
 					particle.is_boundary = true;
 					break;
 				}
-			}
+			}*/
 			
 			particle.calc_index();
 
@@ -430,7 +433,7 @@ void SPH_main::time_dynamic()
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_f <= dt_a && dt_f <= dt_a && dt_f != 0)
+	else if (dt_f <= dt_a && dt_f <= dt_cfl && dt_f != 0)
 	{
 		dt = cfl * dt_f;
 	}
