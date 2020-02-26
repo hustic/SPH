@@ -26,14 +26,15 @@ BOOST_AUTO_TEST_CASE(TestInitialiseGrid)
 
 BOOST_AUTO_TEST_SUITE_END();
 
+/* 
+ * Spline Functions Tests
+ */
 BOOST_AUTO_TEST_SUITE(TestSplineFunctions, * description("Testsing Cubic Spline Functions"));
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineLess,  * description("Distance between 0 and 1"))
 {
     domain.h = 1.;
-    double dn[2] = { 1/2 , 0. };
-    double q = double(sqrt(dn[0] * dn[0] + dn[1] * dn[1]));
-    std::cout << q << std::endl;
+    double dn[2] = { 0.5 , 0. };
     double tres = domain.cubic_spline(dn);
     double res = 10.0 * (1.0 - 1.5 * 1/4 + 0.75 * 1/8) / (7.0 * M_PI);
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
@@ -50,7 +51,8 @@ BOOST_AUTO_TEST_CASE(TestCubicSplineGreater, * description("Distance between 1 a
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineOutsite, * description("Distance outside the spline"))
 {
-    double dn[2] = {2*domain.h, 2*domain.h};
+    domain.h = 1.;
+    double dn[2] = {2, 1};
     double tres = domain.cubic_spline(dn);
     double res = 0;
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
@@ -60,30 +62,32 @@ BOOST_AUTO_TEST_CASE(TestCubicSplineFirstLess, \
 * description("First derivative of distance between 0 and 1"))
 {
     domain.h = 1.;
-    double dn[2] = {2, 2};
-    double q = sqrt(dn[0] * dn[0] + dn[1] * dn[1]) / domain.h;
+    double dn[2] = {0.5, 0};
     double tres = domain.cubic_spline_first_derivative(dn);
-    double res = 10 * (-3 * q + 2.25 * q * q) / (7 * M_PI * pow(domain.h, 3));
+    double res = 10 * (-3 * 0.5 + 2.25 * 1/4) / (7 * M_PI);
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
 }
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineFirstGreater, \
 * description("First derivative of distance between 1 and 2"))
 {
-    double dn[2] = {domain.h, domain.h};
-    double q = sqrt(dn[0] * dn[0] + dn[1] * dn[1]) / domain.h;
+    domain.h = 1.;
+    double dn[2] = {1, 0};
     double tres = domain.cubic_spline_first_derivative(dn);
-    double res = -10 * 0.75 * (2 - q) * (2 - q) / (7 * M_PI * pow(domain.h, 3));
+    double res = -10 * 0.75 * (2 - 1) * (2 - 1) / (7 * M_PI);
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
 }
 
 BOOST_AUTO_TEST_CASE(TestCubicSplineFirstOutside, \
 * description("First derivative of distance outside the spline"))
 {
-    double dn[2] = {2*domain.h, 2*domain.h};
+    domain.h = 1.;
+    double dn[2] = {2., 1.};
     double tres = domain.cubic_spline_first_derivative(dn);
     double res = 0;
     BOOST_TEST(tres == res, tt::tolerance(0.0001));
 }
 
 BOOST_AUTO_TEST_SUITE_END();
+
+
