@@ -13,8 +13,9 @@ is using and holds all the functions, globals and data strucutres needed to run
 the simulation.
 
 ** /SPH_particle/
-TODO Include complete descriptions of class variables
-Class variables:
+* TODO Include complete descriptions of class variables
+
+*** Class variables:
 - x[] (double) :: Position
 - v[] (double) :: Velocity
 - rho (double) :: Density
@@ -35,5 +36,6 @@ Class variables:
 - list_num[] (int) :: Index in neighbour finding array
 - is_boundary (bool) :: Set true if the particle is part of the boundary
 
-Class functions:
+*** Class functions:
 - calc_index(void) (void) ::
+
