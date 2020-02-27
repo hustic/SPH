@@ -44,8 +44,8 @@ def test_particle_behavior():
                 # liquid leaking from the inner boundary
 
                 liquid = df.loc[df.types=='0']
-                print("This part would not pass the test! leaking SSSSSSSsligtly into boundary, check TMR")
-                print("Also Check the type thing!")
+                #print("This part would not pass the test! leaking SSSSSSSsligtly into boundary, check TMR")
+                #print("Also Check the type thing!")
                 assert len(liquid.loc[liquid.x<0])==0, ("liquid leaking out from left inner boundary, key = " + i)
                 assert len(liquid.loc[liquid.x>20.])==0, ("liquid leaking out from right inner boundary, key = " + i)
                 assert len(liquid.loc[liquid.y<0])==0, ("liquid leaking out from bottom inner boundary, key = " + i)
