@@ -2,7 +2,7 @@
 
 * ACSE-4-SPH
 
-[Smoothed Particle Hydrodynamics](https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics) (SPH) is a meshless
+[[https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics][Smoothed Particle Hydrodynamics]] (SPH) is a meshless
 method for solving the Navier-Stokes equation, in which fluid properties are stored on Lagrangian fluid particles (i.e. on
 particles which move with the fluid flow). The particles interact to generate values across the entire fluid domain through
 continuous smoothing kernels.
@@ -21,7 +21,7 @@ make
 
 Note, that the /post.py/ uses the /lxlm/ library. The installation of that
 library changes from system to system. Users are thus encouraged to check out
-the [installation page on the lxlm website](https://lxml.de/installation.html).
+the [[https://lxml.de/installation.html][installation page on the lxlm website]].
 
 Also note, that the testing routines use the BOOST library, which is another can
 of worms. If you are using a Linux distribution (however) you can just use /apt-get/:
@@ -38,8 +38,7 @@ sudo apt-get install libboost-all-dev
 ** Documentation
 Extensive Documentation has been written for both the tool and its testing
 routines.
-You can either check the [Markdown version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md), [emacs org-mode version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org), [pdf
-version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf), or head over to the Github wiki :D
+You can either check the [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md][Markdown version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org][emacs org-mode version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf][pdf version]], or head over to the Github wiki :D
 
 ** Testing
 
