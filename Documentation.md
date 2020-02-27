@@ -165,14 +165,7 @@ For dynamic time stepping
 
 Calculates the cubic spline according to three cases:
 
-\begin{equation}
-W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
-    1 - \frac{3}{2} q^2 + \frac{3}{4} q^3 & \text{ if } 0 \leq q \leq 1\\
-    \frac{1}{4} (2 - q)^3 & \text{ if } 1 \leq q \leq 2\\
-    0 & \text{ if } q > 2
-  \end{cases}
-\text{Where } q = \frac{r}{h}
-\end{equation}
+![equation](https://latex.codecogs.com/gif.latex?W%28r%2C%20h%29%20%3D%20%5Cfrac%7B10%7D%7B7%5Cpi%20h%5E%7B2%7D%7D%20%5Cbegin%7Bcases%7D%201%20-%20%5Cfrac%7B3%7D%7B2%7D%20q%5E2%20&plus;%20%5Cfrac%7B3%7D%7B4%7D%20q%5E3%20%26%20%5Ctext%7B%20if%20%7D%200%20%5Cleq%20q%20%5Cleq%201%5C%5C%20%5Cfrac%7B1%7D%7B4%7D%20%282%20-%20q%29%5E3%20%26%20%5Ctext%7B%20if%20%7D%201%20%5Cleq%20q%20%5Cleq%202%5C%5C%200%20%26%20%5Ctext%7B%20if%20%7D%20q%20%3E%202%20%5Cend%7Bcases%7D%20%5C%5C%20%5Ctext%7BWhere%20%7D%20q%20%3D%20%5Cfrac%7Br%7D%7Bh%7D)
 
 -   **cubic\_spline\_first\_derivative(*double r[]*) (double):** Cubic Spline First
     Derivative calculation function.
@@ -181,14 +174,7 @@ W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
         
         Calculates the cubic spline according to three cases:
     
-    \begin{equation}
-    \nabla W(r, h) = \frac{10}{7\pi h^{3}} \begin{cases}
-        -3 q + \frac{9}{4} q^2 & \text{ if } 0 \leq q \leq 1\\
-        -10 \frac{3}{4} (2 - q)^2 & \text{ if } 1 \leq q \leq 2\\
-        0 & \text{ if } q > 2
-      \end{cases}
-    \text{Where } q = \frac{r}{h}
-    \end{equation}
+![euqation](https://latex.codecogs.com/gif.latex?%5Cnabla%20W%28r%2C%20h%29%20%3D%20%5Cfrac%7B10%7D%7B7%5Cpi%20h%5E%7B3%7D%7D%20%5Cbegin%7Bcases%7D%20-3%20q%20&plus;%20%5Cfrac%7B9%7D%7B4%7D%20q%5E2%20%26%20%5Ctext%7B%20if%20%7D%200%20%5Cleq%20q%20%5Cleq%201%5C%5C%20-10%20%5Cfrac%7B3%7D%7B4%7D%20%282%20-%20q%29%5E2%20%26%20%5Ctext%7B%20if%20%7D%201%20%5Cleq%20q%20%5Cleq%202%5C%5C%200%20%26%20%5Ctext%7B%20if%20%7D%20q%20%3E%202%20%5Cend%7Bcases%7D%20%5C%5C%20%5Ctext%7BWhere%20%7D%20q%20%3D%20%5Cfrac%7Br%7D%7Bh%7D)
 
 -   **update\_gradients(*double r[]*, *SPH\_particle\* part*, *SPH\_particle\* other\_part*) (void):** Updating the values of rate of change of speed (acceleration) and density.
     
@@ -197,13 +183,10 @@ W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
     -   *other\_part* is a pointer to the neighbouring particle used in the calculation.
         The calculations are done according to the following functions:
     
-    \begin{equation}
-       \alpha_i = - \sum_{j=1}^{N} m_j \Big(\frac{P_i}{\rho_i^2} + \frac{P_j}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij},h)e_{ij} + \sum_{j=1}^{N} m_j \Big( \frac{1}{\rho_i^2} + \frac{1}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij}, h) \frac{v_{ij}} {r_{ij}}
-    \end{equation}
+![equation](https://latex.codecogs.com/gif.latex?%5Calpha_i%20%3D%20-%20%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20m_j%20%5CBig%28%5Cfrac%7BP_i%7D%7B%5Crho_i%5E2%7D%20&plus;%20%5Cfrac%7BP_j%7D%7B%5Crho_j%5E2%7D%20%5CBig%29%20%5Cfrac%7BdW%7D%7Bdr%7D%28r_%7Bij%7D%2Ch%29e_%7Bij%7D%20&plus;%20%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20m_j%20%5CBig%28%20%5Cfrac%7B1%7D%7B%5Crho_i%5E2%7D%20&plus;%20%5Cfrac%7B1%7D%7B%5Crho_j%5E2%7D%20%5CBig%29%20%5Cfrac%7BdW%7D%7Bdr%7D%28r_%7Bij%7D%2C%20h%29%20%5Cfrac%7Bv_%7Bij%7D%7D%20%7Br_%7Bij%7D%7D)
     
-    \begin{equation}
-    D_i = \sum_{j=1}^{N} m_j \frac{dW}{dr}(r_{ij}, h) v_{ij} \cdot e_{ij}
-    \end{equation}
+![equation](https://latex.codecogs.com/gif.latex?D_i%20%3D%20%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20m_j%20%5Cfrac%7BdW%7D%7Bdr%7D%28r_%7Bij%7D%2C%20h%29%20v_%7Bij%7D%20%5Ccdot%20e_%7Bij%7D)
+
 -   **density\_field\_smoothing(*SPH\_particle\* part*) (void):** Smoothing out the
     Density/Pressure field. This is done because the integration of the continuity
     equation will result in variations in density and pressure based on the
@@ -213,9 +196,8 @@ W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
     
     -   *part* is a pointer to the particle whose density is to be smoothed.
     
-    \begin{equation}
-    \rho_i = \frac{\sum_{j = 1}^{n} W(r_{ij},h)}{\sum_{j = 1}^{n} \frac{W(r_{ij)}{\rho_j}}}
-    \end{equation}
+    ![equation](https://latex.codecogs.com/gif.latex?%5Crho_i%20%3D%20%5Cfrac%7B%5Csum_%7Bj%20%3D%201%7D%5E%7Bn%7D%20W%28r_%7Bij%7D%2Ch%29%7D%7B%20%5Csum_%7Bj%20%3D%201%7D%5E%7Bn%7D%20%5Cfrac%7BW%28r_%7Bij%7D%29%7D%7B%5Crho_j%7D%7D)
+    
 -   **set\_values(*double delta\_x*) (void):** Setting simulation parameters.
     -   *delta\_x* the distance between particles in the initial configuration.
 -   **initialize\_grid(*void*) (void):** This function initializes the search grid
