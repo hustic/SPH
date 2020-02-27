@@ -155,14 +155,37 @@ Calculates the cubic spline according to three cases:
   \rho_i = \frac{\sum_{j = 1}^{n} W(r_{ij},h)}{\sum_{j = 1}^{n} \frac{W(r_{ij)}{\rho_j}}}
   \end{equation}
 - set_values(/double delta_x/) (void) :: Setting simulation parameters.
-- initialize_grid(/void/) (void) ::
+  + /delta_x/ the distance between particles in the initial configuration.
+- initialize_grid(/void/) (void) :: This function initializes the search grid
+  used to find neighbours. This is done by dividing the points into cell grids
+  of size double the initial distance between particles and allocating them to
+  the corresponding cell.
 - place_points(/double min0/, /double min1/, /double max0/, /double max1/, /bool type/) (void) ::
+  This function is responsible for initializing the points to the domain, by
+  setting all the variables (as defined in the /SPH_particle/ variables).
+  + /min0/ minimum position value for the x-direction.
+  + /min1/ minimum position value for the y-direction.
+  + /max0/ maximum position value for the x-direction.
+  + /max1/ maximum position value for the y-direction.
+  + /type/ boolean that defines weather or not the particle is on the boundary.
 - allocate_to_grid(/void/) (void) :: Allocates all the points to the search grid
-  (assumes that index has been appropriately update).
-- neighbour_iterate(/SPH_particle* part/) (void) ::
-- update_particle(/SPH_particle* part/) (void) ::
-- reset_grid_count() (void) ::
-- update_rho(/SPH_particle* part/) (void) ::
+  (assumes that index has been appropriately updated). This function is called
+  in every iteration step, as the movement of the particles might change their
+  corresponding search grid cell.
+- neighbour_iterate(/SPH_particle* part/) (void) :: The main function that
+  searches the search grid to find the corresponding neighbours for the given
+  particle.
+  + /part/ the particle for which the neighbours are searched.
+  !!!NEED TO ADD DESCRIPTION!!!!
+- update_particle(/SPH_particle* part/) (void) :: Function that updates the
+  position, velocity, density and pressure, according to the results of the
+  /update_gradients/ functions.
+  + /part/ the particle for which the variables are updated.
+- reset_grid_count() (void) :: This function resets the grid count of the domain
+  after every iteration.
+- update_rho(/SPH_particle* part/) (void) :: This function updates the density
+  of the particle after each half and whole timestep.
+  + /part/ the particle for which the density is updated.
 - store_initial(/SPH_particle* part/) (void) ::
 - time_dynamic() (void) ::
 - full_update(/SPH_particle* part/) (void) ::
