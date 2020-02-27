@@ -32,7 +32,7 @@ def test_read_keys():
 # hard coded value (or we can read the input file here)
 # minx -0.6, min y -0.6
 def test_particle_behavior():
-        hdf = pd.HDFStore('tests/result.h5', mode='r')
+        hdf = pd.HDFStore('tests/output_test.h5', mode='r')
         keylist = sorted(hdf.keys())
         for i in keylist:
                 df = hdf.get(i)

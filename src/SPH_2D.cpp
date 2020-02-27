@@ -234,7 +234,7 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 			particle.is_boundary = type;
 			
 			particle.calc_index();
-			cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
+			//cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
 
 			particle_list.push_back(particle);
 
