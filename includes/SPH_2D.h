@@ -60,6 +60,7 @@ public:
 	void time_dynamic();
 	void full_update(SPH_particle* part);
 	void get_new_max(SPH_particle* part);
+	double repulsion(SPH_particle* part, double &dist);
     
 	double h;								//smoothing length
 	double h_fac;
