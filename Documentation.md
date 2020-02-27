@@ -165,7 +165,7 @@ For dynamic time stepping
 
 Calculates the cubic spline according to three cases:
 
-http://latex.codecogs.com/svg.latex?%5Cbegin%7Bequation%7D%0D%0AW%28r%2C+h%29+%3D+%5Cfrac%7B10%7D%7B7%5Cpi+h%5E%7B2%7D%7D+%5Cbegin%7Bcases%7D%0D%0A++++1+-+%5Cfrac%7B3%7D%7B2%7D+q%5E2+%2B+%5Cfrac%7B3%7D%7B4%7D+q%5E3+%26+%5Ctext%7B+if+%7D+0+%5Cleq+q+%5Cleq+1%5C%5C%0D%0A++++%5Cfrac%7B1%7D%7B4%7D+%282+-+q%29%5E3+%26+%5Ctext%7B+if+%7D+1+%5Cleq+q+%5Cleq+2%5C%5C%0D%0A++++0+%26+%5Ctext%7B+if+%7D+q+%3E+2%0D%0A++%5Cend%7Bcases%7D%0D%0A%5Ctext%7BWhere+%7D+q+%3D+%5Cfrac%7Br%7D%7Bh%7D%0D%0A%5Cend%7Bequation%7D
+![equation](https://latex.codecogs.com/gif.latex?W%28r%2C%20h%29%20%3D%20%5Cfrac%7B10%7D%7B7%5Cpi%20h%5E%7B2%7D%7D%20%5Cbegin%7Bcases%7D%201%20-%20%5Cfrac%7B3%7D%7B2%7D%20q%5E2%20&plus;%20%5Cfrac%7B3%7D%7B4%7D%20q%5E3%20%26%20%5Ctext%7B%20if%20%7D%200%20%5Cleq%20q%20%5Cleq%201%5C%5C%20%5Cfrac%7B1%7D%7B4%7D%20%282%20-%20q%29%5E3%20%26%20%5Ctext%7B%20if%20%7D%201%20%5Cleq%20q%20%5Cleq%202%5C%5C%200%20%26%20%5Ctext%7B%20if%20%7D%20q%20%3E%202%20%5Cend%7Bcases%7D%20%5C%5C%20%5Ctext%7BWhere%20%7D%20q%20%3D%20%5Cfrac%7Br%7D%7Bh%7D)
 
 -   **cubic\_spline\_first\_derivative(*double r[]*) (double):** Cubic Spline First
     Derivative calculation function.
