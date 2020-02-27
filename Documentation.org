@@ -152,9 +152,11 @@ Calculates the cubic spline according to three cases:
   spacing and velocity; resulting in a "rough" density and pressure
   distributions. To get around this problem, we implemented a density smoother.
   + /part/ is a pointer to the particle whose density is to be smoothed.
+
   \begin{equation}
-  \rho_i = \frac{\sum_{j = 1}^{n} W(r_{ij},h)}{\sum_{j = 1}^{n} \frac{W(r_{ij)}{\rho_j}}}
-  \end{equation}
+  \rho_i = \frac{\sum_{j = 1}^{n} W(r_{ij},h)}{ \sum_{j = 1}^{n} \frac{W(r_{ij})}{\rho_j}}}
+   \end{equation}
+
 - set_values(/double delta_x/) (void) :: Setting simulation parameters.
   + /delta_x/ the distance between particles in the initial configuration.
 - initialize_grid(/void/) (void) :: This function initializes the search grid
