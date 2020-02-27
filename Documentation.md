@@ -164,7 +164,7 @@ For dynamic time stepping
     -   *r[]* contains the distance between two points.
 
 Calculates the cubic spline according to three cases:
-
+```math
 \begin{equation}
 W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
     1 - \frac{3}{2} q^2 + \frac{3}{4} q^3 & \text{ if } 0 \leq q \leq 1\\
@@ -173,6 +173,7 @@ W(r, h) = \frac{10}{7\pi h^{2}} \begin{cases}
   \end{cases}
 \text{Where } q = \frac{r}{h}
 \end{equation}
+```
 
 -   **cubic\_spline\_first\_derivative(*double r[]*) (double):** Cubic Spline First
     Derivative calculation function.
