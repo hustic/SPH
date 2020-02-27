@@ -166,7 +166,7 @@ int main(void)
 		{
 			stringstream name;
 			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/t_print) << ".vtp";		
-			write_file(name.str().c_str(), &domain.particle_list);
+			write_file(name.str().c_str(), &domain.particle_list, domain.analysisMode);
 			dt_print = 0;
 		}
 		t += domain.dt;

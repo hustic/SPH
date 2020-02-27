@@ -11,22 +11,48 @@ As the SPH method is meshless and Lagrangian, it is ideal for solving problems i
 surfaces. This tool implements the SPH method in C++ to solve wave generation in a lock-release/dam-break problem.
 
 ** Compilation/Installation Guide
+A Makefile has been provided that builds the tool and places the executables in
+the /bin/ folder. Reading through the Makefile is highly encouraged to see all
+the options a user has for building and testing the tool. The simplest way to
+compile is:
+#+BEGIN_SRC bash
+make
+#+END_SRC
 
-*To be written*
+Note, that the /post.py/ uses the /lxlm/ library. The installation of that
+library changes from system to system. Users are thus encouraged to check out
+the [installation page on the lxlm website](https://lxml.de/installation.html).
+
+Also note, that the testing routines use the BOOST library, which is another can
+of worms. If you are using a Linux distribution (however) you can just use /apt-get/:
+
+#+BEGIN_SRC bash
+sudo apt-get install libboost-all-dev
+#+END_SRC
+, or any other package manager your distribution comes with.
 
 ** User instructions
 
 *To be written*
 
 ** Documentation
-
-*To be written*
+Extensive Documentation has been written for both the tool and its testing
+routines.
+You can either check the [Markdown version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md), [emacs org-mode version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org), [pdf
+version](https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf), or head over to the Github wiki :D
 
 ** Testing
 
 The tool includes tests, which you can use to check its operation on your system. With the code compiled, these can be run
 with
 
-#+BEGIN_SRC python
+#+BEGIN_SRC bash
 python run_tests.py
+#+END_SRC
+
+If you are on a Linux distribution and you want to compile and run the complete
+testing routines, you can use:
+
+#+BEGIN_SRC bash
+make runtests
 #+END_SRC
