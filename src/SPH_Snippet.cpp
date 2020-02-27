@@ -154,7 +154,7 @@ int main(void)
 		if (dt_print >= t_print)
 		{
 			stringstream name;
-			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/0.1) << ".vtp";		
+			name << "output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/t_print) << ".vtp";		
 			write_file(name.str().c_str(), &domain.particle_list);
 			dt_print = 0;
 		}
