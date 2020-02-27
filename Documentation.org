@@ -2,6 +2,7 @@
 #+AUTHOR: ness
 
 #+OPTION: ^:nill
+#+OPTION: tex:t
 
 This tool has been implemented in C++ with Python as a means to analyze data and
 test the output of the code. Bellow is the documentation of the functions used
@@ -186,7 +187,8 @@ Calculates the cubic spline according to three cases:
 - update_rho(/SPH_particle* part/) (void) :: This function updates the density
   of the particle after each half and whole timestep.
   + /part/ the particle for which the density is updated.
-- store_initial(/SPH_particle* part/) (void) ::
+- store_initial(/SPH_particle* part/) (void) :: eheheheh
+ 
 - time_dynamic() (void) ::
 - full_update(/SPH_particle* part/) (void) ::
 - get_new_max(/SPH_particle* part/) (void) ::
