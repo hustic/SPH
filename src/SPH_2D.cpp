@@ -1,4 +1,5 @@
 ﻿#include "SPH_2D.h"
+#include <omp.h>
 
 
 SPH_main *SPH_particle::main_data;
@@ -65,12 +66,21 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 	{
 		vij[n] = part->v[n] - other_part->v[n];
 		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
+<<<<<<< HEAD
 		part->a[n] += (-1)*mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
+=======
+		#pragma omp atomic
+		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
+>>>>>>> implementation
 	}
 	if (part->vij_half[0] < sqrt(vij[0] * vij[0] + vij[1] * vij[1]) && !part->is_boundary && !other_part->is_boundary)
 	{
 		part->vij_half[0] = sqrt(vij[0] * vij[0] + vij[1] * vij[1]);
 	}
+<<<<<<< HEAD
+=======
+	#pragma omp atomic
+>>>>>>> implementation
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 }
 
@@ -83,8 +93,12 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	double dn2[2];			//vector from 1st to 2nd particle
 
 	int cnt;
+<<<<<<< HEAD
 
 	if (analysisMode) part->rho_spacing = 0; // set the starting spacing rho0, include the particle itself
+=======
+	// #pragma parallel for
+>>>>>>> implementation
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
 		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
@@ -107,10 +121,14 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 							dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
 							if (dist < 2. * h)		//only particle within 2h
 							{
+								#pragma omp atomic
 								part->numerator += cubic_spline(dn1);
+								#pragma omp atomic
 								part->denominator += cubic_spline(dn1) / other_part->rho;
 
+								#pragma omp atomic
 								other_part->numerator += cubic_spline(dn2);
+								#pragma omp atomic
 								other_part->denominator += cubic_spline(dn2) / part->rho;
 
 								if (analysisMode)
@@ -137,10 +155,14 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 							dist = sqrt(dn1[0] * dn1[0] + dn1[1] * dn1[1]);
 							if (dist < 2. * h)					//only particle within 2h
 							{
+								#pragma omp atomic
 								part->numerator += cubic_spline(dn1);
+								#pragma omp atomic
 								part->denominator += cubic_spline(dn1) / other_part->rho;
 
+								#pragma omp atomic
 								other_part->numerator += cubic_spline(dn2);
+								#pragma omp atomic
 								other_part->denominator += cubic_spline(dn2) / part->rho;
 
 								if (analysisMode)
@@ -234,7 +256,11 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 			particle.is_boundary = type;
 			
 			particle.calc_index();
+<<<<<<< HEAD
 			//cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
+=======
+			// cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
+>>>>>>> implementation
 
 			particle_list.push_back(particle);
 
@@ -336,17 +362,22 @@ void SPH_main::update_particle(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (part->x_half[k] + 0.5 * dt * part->v[k] < min_x[k] + 3.0 * dx)
+			if (part->x[k] < min_x[k] + 3.5 * dx)
 			{
-				part->v[k] = abs(part->v_half[k] + 0.5 * dt * part->a[k]);
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] += abs(repulsion(part, dist));
+				// cout << " acc " <<part->v[k] << endl;
 			}
-			else if(part->x_half[k] + 0.5 * dt * part->v[k] > max_x[k] - 3.0 * dx){
-				part->v[k] = -abs(part->v_half[k] + 0.5 * dt * part->a[k]);
+			else if(part->x[k] > max_x[k] - 3.5 * dx){
+
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] -= abs(repulsion(part, dist));
+				// cout << " acc " <<part->v[k] << endl;
 			}
-			else {
-				part->x[k] = part->x_half[k] + 0.5 * dt * part->v[k];
-				part->v[k] = part->v_half[k] + 0.5 * dt * part->a[k];
-			}
+            part->x[k] = part->x_half[k] + 0.5 * dt * part->v[k];
+            part->v[k] = part->v_half[k] + 0.5 * dt * part->a[k];
 		}
 		for (int n = 0; n < 2; n++)
 		{
@@ -395,17 +426,9 @@ void SPH_main::full_update(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (2 * part->x[k] - part->x_half[k] < min_x[k] + 3.0 * dx)
-			{
-				part->v[k] = abs(2 * part->v[k] - part->v_half[k]);
-			}
-			else if(2 * part->x[k] - part->x_half[k] > max_x[k] - 3.0 * dx){
-				part->v[k] = -abs(2 * part->v[k] - part->v_half[k]);
-			}
-			else {
-				part->x[k] = 2 * part->x[k] - part->x_half[k];
-				part->v[k] = 2 * part->v[k] - part->v_half[k];
-			}
+            part->x[k] = 2 * part->x[k] - part->x_half[k];
+            part->v[k] = 2 * part->v[k] - part->v_half[k];
+			
 			part->a_half[k] = part->a[k];
 		}
 		for (int n = 0; n < 2; n++)
@@ -435,7 +458,7 @@ void SPH_main::time_dynamic()
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_a <= dt_f && dt_a != 0 && dt_cfl == 0)
+	else if (dt_a <= dt_f && dt_a > 1e-6 && dt_cfl != 0)
 	{
 		dt = cfl * dt_a;
 	}
@@ -465,4 +488,17 @@ void SPH_main::get_new_max(SPH_particle* part)
 		if (a_max < temp_aa) a_max = temp_aa;
 		if (rho_max < part->rho) rho_max = part->rho;
 	}
+<<<<<<< HEAD
+=======
 }
+
+
+double SPH_main::repulsion(SPH_particle *part, double &dist)
+{
+	double fd = pow((0.5 * dx / dist), 6) - 1.0;
+	double temp_a = fd * 9.81 * 1.0 / dx;
+
+    return temp_a;
+>>>>>>> implementation
+}
+

@@ -1,6 +1,6 @@
-CXX = g++
+CXX = g++ -lpthread -fopenmp
 CXXFLAGS = -Wall -std=c++17
-LDFLAGS =
+LDFLAGS = 
 SOURCE_DIR = src
 INCLUDE_DIR = includes
 TEST_DIR = tests
