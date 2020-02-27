@@ -422,19 +422,19 @@ void SPH_main::time_dynamic()
 	if (a_max != 0) dt_a = sqrt(h / a_max);
 	if (rho_max != 0) dt_f = h / (c0 * sqrt(pow((rho_max / rho0), gamma - 1)));
 
-	if (dt_cfl <= dt_a && dt_cfl <= dt_f && dt_cfl > 1e-6)
+	if (dt_cfl <= dt_a && dt_cfl <= dt_f && dt_cfl != 0)
 	{
 		dt = cfl * dt_cfl;
 	}
-	else if (dt_a <= dt_cfl && dt_a <= dt_f && dt_a > 1e-6)
+	else if (dt_a <= dt_cfl && dt_a <= dt_f && dt_a != 0)
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_a <= dt_f && dt_a > 1e-6 && dt_cfl > 1e-6 )
+	else if (dt_a <= dt_f && dt_a > 1e-6 && dt_cfl != 0)
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_f > 1e-6)
+	else if (dt_f != 0)
 	{
 		dt = cfl * dt_f;
 	}

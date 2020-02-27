@@ -130,7 +130,6 @@ int main(void)
 		domain.reset_grid_count();
 		
 		if (count % 10 == 0) {
-		#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
 			// cout << "Density field smoothed at iter = " << iter << endl;
 			#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
 			for (int j = 0; j < domain.max_list[1]; j++)
