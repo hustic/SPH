@@ -70,7 +70,7 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
 
 	}
-	if (part->vij_half[0] < sqrt(vij[0] * vij[0] + vij[1] * vij[1]) && !part->is_boundary && !other_part->is_boundary)
+	if (part->vij_half[0] < sqrt(vij[0] * vij[0] + vij[1] * vij[1]) && (!part->is_boundary || !other_part->is_boundary))
 	{
 		part->vij_half[0] = sqrt(vij[0] * vij[0] + vij[1] * vij[1]);
 	}
@@ -257,9 +257,11 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 
 void SPH_main::allocate_to_grid(void)				//needs to be called each time that all the particles have their positions updated
 {
+	#pragma omp parallel for schedule(static, 1) num_threads(4)
 	for (int i = 0; i < max_list[0]; i++)
 		for (int j = 0; j < max_list[1]; j++)
 			search_grid[i][j].clear();
+
 	for (unsigned int cnt = 0; cnt < particle_list.size(); cnt++)
 	{
 		search_grid[particle_list[cnt].list_num[0]][particle_list[cnt].list_num[1]].push_back(&particle_list[cnt]);
@@ -430,9 +432,9 @@ void SPH_main::full_update(SPH_particle* part)
 
 void SPH_main::time_dynamic()
 {
-	if (v_max != 0) dt_cfl = (h / v_max);
-	if (a_max != 0) dt_a = sqrt(h / a_max);
-	if (rho_max != 0) dt_f = h / (c0 * sqrt(pow((rho_max / rho0), gamma - 1)));
+	dt_cfl = (h / v_max);
+	dt_a = sqrt(h / a_max);
+	dt_f = h / (c0 * sqrt(pow((rho_max / rho0), gamma - 1)));
 
 	if (dt_cfl <= dt_a && dt_cfl <= dt_f && dt_cfl != 0)
 	{
@@ -442,7 +444,7 @@ void SPH_main::time_dynamic()
 	{
 		dt = cfl * dt_a;
 	}
-	else if (dt_a <= dt_f && dt_a > 1e-6 && dt_cfl != 0)
+	else if (dt_a <= dt_f && dt_a != 0 && dt_cfl != 0)
 	{
 		dt = cfl * dt_a;
 	}

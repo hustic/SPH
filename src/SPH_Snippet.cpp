@@ -77,7 +77,7 @@ int main(void)
 
 	while (t < t_max)
 	{
-		// cout << "t = " << t << endl;
+		cout << "t = " << t << endl;
 		// first half step
 		#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
 		for (int j = 0; j < domain.max_list[1]; j++)
@@ -91,20 +91,20 @@ int main(void)
 				}
 			}
 		}
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle(&domain.particle_list[i]);
 
 		domain.reset_grid_count();
 
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
 		domain.allocate_to_grid();								//update grid index of each particle
 		
 		// first full step
-		#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
+		#pragma omp parallel for schedule(dynamic, 1) num_threads(4)
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
 			for (int i = 0; i < domain.max_list[0]; i++)
@@ -117,14 +117,14 @@ int main(void)
 		}
 
 		// last full step
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 		{
 			domain.update_particle(&domain.particle_list[i]);
 			domain.full_update(&domain.particle_list[i]);
 
 		}
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
@@ -133,7 +133,7 @@ int main(void)
 		
 		if (count % 10 == 0) {
 			// cout << "Density field smoothed at iter = " << iter << endl;
-			#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
+			#pragma omp parallel for schedule(dynamic, 1) num_threads(4)
 			for (int j = 0; j < domain.max_list[1]; j++)
 			{
 				for (int i = 0; i < domain.max_list[0]; i++)
@@ -147,14 +147,14 @@ int main(void)
 		}
 		if (count % 10 == 0) 
 		{
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 			for (int i = 0; i < domain.particle_list.size(); i++)
 				domain.update_rho(&domain.particle_list[i]);
 		}
 		domain.reset_grid_count();
 		
 		// get the max for minimum dynamic time step
-		#pragma omp parallel for schedule(static, 1) num_threads(6)
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.get_new_max(&domain.particle_list[i]);
 
