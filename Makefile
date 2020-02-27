@@ -1,4 +1,4 @@
-CXX = g++
+CXX = g++ -lpthread -fopenmp
 CXXFLAGS = -Wall -std=c++17
 LDFLAGS =
 SOURCE_DIR = src
