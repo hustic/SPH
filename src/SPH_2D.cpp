@@ -336,16 +336,16 @@ void SPH_main::update_particle(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (part->x_half[k] + dt * part->v[k] < min_x[k] + 3.0 * dx)
+			if (part->x_half[k] + 0.5 * dt * part->v[k] < min_x[k] + 3.0 * dx)
 			{
-				part->v[k] = abs(part->v_half[k] + dt * part->a[k]);
+				part->v[k] = abs(part->v_half[k] + 0.5 * dt * part->a[k]);
 			}
-			else if(part->x_half[k] + dt * part->v[k] > max_x[k] - 3.0 * dx){
-				part->v[k] = -abs(part->v_half[k] + dt * part->a[k]);
+			else if(part->x_half[k] + 0.5 * dt * part->v[k] > max_x[k] - 3.0 * dx){
+				part->v[k] = -abs(part->v_half[k] + 0.5 * dt * part->a[k]);
 			}
 			else {
-				part->x[k] = part->x_half[k] + dt * part->v[k];
-				part->v[k] = part->v_half[k] + dt * part->a[k];
+				part->x[k] = part->x_half[k] + 0.5 * dt * part->v[k];
+				part->v[k] = part->v_half[k] + 0.5 * dt * part->a[k];
 			}
 		}
 		for (int n = 0; n < 2; n++)
@@ -354,7 +354,7 @@ void SPH_main::update_particle(SPH_particle* part)
 		}
 	}
 
-	part->rho = part->rho_half + part->D * dt;
+	part->rho = part->rho_half + 0.5 * part->D * dt;
 	part->P = B * (pow((part->rho / rho0), gamma) - 1);
 
 	part->D = 0.0;
