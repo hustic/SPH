@@ -174,14 +174,7 @@ Calculates the cubic spline according to three cases:
         
         Calculates the cubic spline according to three cases:
     
-    \begin{equation}
-    \nabla W(r, h) = \frac{10}{7\pi h^{3}} \begin{cases}
-        -3 q + \frac{9}{4} q^2 & \text{ if } 0 \leq q \leq 1\\
-        -10 \frac{3}{4} (2 - q)^2 & \text{ if } 1 \leq q \leq 2\\
-        0 & \text{ if } q > 2
-      \end{cases}
-    \text{Where } q = \frac{r}{h}
-    \end{equation}
+![euqation](https://latex.codecogs.com/gif.latex?%5Cnabla%20W%28r%2C%20h%29%20%3D%20%5Cfrac%7B10%7D%7B7%5Cpi%20h%5E%7B3%7D%7D%20%5Cbegin%7Bcases%7D%20-3%20q%20&plus;%20%5Cfrac%7B9%7D%7B4%7D%20q%5E2%20%26%20%5Ctext%7B%20if%20%7D%200%20%5Cleq%20q%20%5Cleq%201%5C%5C%20-10%20%5Cfrac%7B3%7D%7B4%7D%20%282%20-%20q%29%5E2%20%26%20%5Ctext%7B%20if%20%7D%201%20%5Cleq%20q%20%5Cleq%202%5C%5C%200%20%26%20%5Ctext%7B%20if%20%7D%20q%20%3E%202%20%5Cend%7Bcases%7D%20%5C%5C%20%5Ctext%7BWhere%20%7D%20q%20%3D%20%5Cfrac%7Br%7D%7Bh%7D)
 
 -   **update\_gradients(*double r[]*, *SPH\_particle\* part*, *SPH\_particle\* other\_part*) (void):** Updating the values of rate of change of speed (acceleration) and density.
     
