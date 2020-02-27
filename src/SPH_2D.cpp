@@ -234,6 +234,7 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 			particle.is_boundary = type;
 			
 			particle.calc_index();
+			//cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
 
 			particle_list.push_back(particle);
 
@@ -335,11 +336,11 @@ void SPH_main::update_particle(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (part->x_half[k] + dt * part->v[k] < min_x[k] + 2.0 * h)
+			if (part->x_half[k] + dt * part->v[k] < min_x[k] + 3.0 * dx)
 			{
 				part->v[k] = abs(part->v_half[k] + dt * part->a[k]);
 			}
-			else if(part->x_half[k] + dt * part->v[k] > max_x[k] - 2.0 * h){
+			else if(part->x_half[k] + dt * part->v[k] > max_x[k] - 3.0 * dx){
 				part->v[k] = -abs(part->v_half[k] + dt * part->a[k]);
 			}
 			else {
@@ -394,11 +395,11 @@ void SPH_main::full_update(SPH_particle* part)
 	{
 		for (int k = 0; k < 2; k++)
 		{
-			if (2 * part->x[k] - part->x_half[k] < min_x[k] + 2.0 * h)
+			if (2 * part->x[k] - part->x_half[k] < min_x[k] + 3.0 * dx)
 			{
 				part->v[k] = abs(2 * part->v[k] - part->v_half[k]);
 			}
-			else if(2 * part->x[k] - part->x_half[k] > max_x[k] - 2.0 * h){
+			else if(2 * part->x[k] - part->x_half[k] > max_x[k] - 3.0 * dx){
 				part->v[k] = -abs(2 * part->v[k] - part->v_half[k]);
 			}
 			else {

@@ -49,7 +49,9 @@ for f in files:
     df = pd.DataFrame(pos, columns=['x', 'y', 'z'])
     df['vel_x'], df['vel_y'], df['vel_z'] = [vel[:, 0], vel[:, 1], vel[:, 2]]
     df['pressure'] = press
+    df['pressure'] = df['pressure'].astype(float)
     df['types'] = types
+    df['types'] = df['types'].astype(int)
     df['density'] = density
     if datas[14][0]!='<':
         spacingDensity = datas[14].strip().split(" ")
