@@ -66,21 +66,16 @@ void SPH_main::update_gradients(double r[2], SPH_particle* part, SPH_particle* o
 	{
 		vij[n] = part->v[n] - other_part->v[n];
 		eij[n] = r[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
-<<<<<<< HEAD
-		part->a[n] += (-1)*mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
-=======
 		#pragma omp atomic
 		part->a[n] += -mass * (part->P / (part->rho * part->rho) + other_part->P / (other_part->rho * other_part->rho)) * dwdr * eij[n] + mu * mass * (1 / (part->rho * part->rho) + 1 / (other_part->rho * other_part->rho)) * dwdr * vij[n] / sqrt(r[0] * r[0] + r[1] * r[1]);
->>>>>>> implementation
+
 	}
 	if (part->vij_half[0] < sqrt(vij[0] * vij[0] + vij[1] * vij[1]) && !part->is_boundary && !other_part->is_boundary)
 	{
 		part->vij_half[0] = sqrt(vij[0] * vij[0] + vij[1] * vij[1]);
 	}
-<<<<<<< HEAD
-=======
+
 	#pragma omp atomic
->>>>>>> implementation
 	part->D += mass * dwdr * (vij[0] * eij[0] + vij[1] * eij[1]);
 }
 
@@ -93,12 +88,7 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	double dn2[2];			//vector from 1st to 2nd particle
 
 	int cnt;
-<<<<<<< HEAD
-
-	if (analysisMode) part->rho_spacing = 0; // set the starting spacing rho0, include the particle itself
-=======
 	// #pragma parallel for
->>>>>>> implementation
 	for (int j = part->list_num[1]; j <= part->list_num[1] + 1; j++)
 		if (j >= 0 && j < max_list[1])
 			for (int i = part->list_num[0] - j + part->list_num[1]; i <= part->list_num[0] + 1; i++)
@@ -256,12 +246,6 @@ void SPH_main::place_points(double min0, double min1, double max0, double max1, 
 			particle.is_boundary = type;
 			
 			particle.calc_index();
-<<<<<<< HEAD
-			//cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
-=======
-			// cout << "Particle has been placed at (" << particle.x[0] << " ," << particle.x[1] << ") with type = " << particle.is_boundary<<endl;
->>>>>>> implementation
-
 			particle_list.push_back(particle);
 
 			x[1] += dx;
@@ -488,8 +472,6 @@ void SPH_main::get_new_max(SPH_particle* part)
 		if (a_max < temp_aa) a_max = temp_aa;
 		if (rho_max < part->rho) rho_max = part->rho;
 	}
-<<<<<<< HEAD
-=======
 }
 
 
@@ -499,6 +481,5 @@ double SPH_main::repulsion(SPH_particle *part, double &dist)
 	double temp_a = fd * 9.81 * 1.0 / dx;
 
     return temp_a;
->>>>>>> implementation
 }
 
