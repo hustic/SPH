@@ -9,7 +9,6 @@ import sys
 
 
 files = sorted(glob.glob(sys.argv[1]+'*'+'.vtp'))
-print(files)
 iters = []
 for f in files:
     doc = etree.parse(f)
@@ -53,13 +52,7 @@ for f in files:
     df['types'] = types
     df['types'] = df['types'].astype(int)
     df['density'] = density
-    if datas[14][0]!='<':
-        spacingDensity = datas[14].strip().split(" ")
-        sd = []
-        for t in spacingDensity:
-            sd.append(float(t))
-        df['spacingDensity'] = sd
-        iters.append(df)
+    iters.append(df)
   
 hdf = pd.HDFStore(sys.argv[1]+'.h5', mode='w')
 for i in range(len(iters)):

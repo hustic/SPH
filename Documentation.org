@@ -19,8 +19,6 @@ is using and holds all the functions, globals and data strucutres needed to run
 the simulation.
 
 ** /SPH_particle/
-**** TODO Include complete descriptions of class variables
-
 *** Class variables:
 - x[] (double) :: Particle position variables. This array has two entries, one
   for the x-direction and one for the y-direction.
@@ -31,7 +29,8 @@ the simulation.
 - a[] (double) :: Particle acceleration variable. This array has two entries,
   one for the x-direction and one for the y-direction.
 - D (double) :: Particle rate of change of density variable.
-- rho2 (dobule) ::
+- rho2 (dobule) :: Particle density variable. Used in the
+  /density_field_smoothing/ function.
 - vij_half[] (double) ::
 - x_half[] (double) :: Particle half-step position variable. This is an array
   that stores the position of the particle after a half step in the second order
@@ -51,8 +50,9 @@ the simulation.
 - D_half (double) :: Particle half-step rate of change of density variable. This
   variable stores the rate of change of density after a half step in the second
   order time-stepping method.
-- numerator (double) ::
-- denominator (double) ::
+- numerator (double) :: Is (literaly) the numerator from density smoothing function.
+- denominator (double) :: Is (literaly) the denominator from the density
+  smoothing function.
 - main_data (staic SPH_main *) :: Link to SPH_main class so that it can be used
   to calc_index
 - list_num[] (int) :: Index in neighbour finding array.
@@ -63,7 +63,6 @@ the simulation.
   /list_index[]/ array.
 ** /SPH_main/
 
-**** TODO Include complete descriptions of class variables and functions
 *** Class variables:
 - h (double) :: Smoothing length
 - h_fac (double) ::
@@ -88,19 +87,32 @@ the simulation.
 
 For dynamic time stepping
 
-- v_max (double) ::
-- a_max (double) ::
-- rho_max (double) ::
-- dt_cfl (double) ::
-- dt_f (double) ::
-- dt_a (double) ::
-- cfl (double) ::
+- v_max (double) :: Maximum velocity of all particles in one iteration.
+- a_max (double) :: Maximum acceleration of all particles in one iteration.
+- rho_max (double) :: Maximum density of all particles in one iteration.
+- dt_cfl (double) :: Constant used in the dynamic time-stepping, according to the
+  formula:
+  \begin{equation}
+  \Delta t_{CFL} = min \Big\{ \frac{h}{|v_{ij}|} \Big\}
+  \end{equation}
+- dt_f (double) :: Constant used in the dynamic time-stepping, according to the
+  formula:
+  \begin{equation}
+  \Delta t_{F} = min \Big\{ \sqrt{\frac{h}{|a_i|}}  \Big\}
+  \end{equation}
+- dt_a (double) :: Constant used in the dynamic time-stepping, according to the
+  formula:
+  \begin{equation}
+  \Delta t_{A} = min \Big\{ \frac{h}{c_o \sqrt{(\rho / \rho_o)^{\gamma - 1}}} \Big\}
+  \end{equation}
+- cfl (double) :: A constant used to scale the constants above. Its range should
+  be between 0.1 - 0.3.
 
 - min_x[], max_x[] (double) :: Dimensions of simulation region
 - grid_count (vector<vector<int>>) ::
-- max_list[] (int) ::
+- max_list[] (int) :: Maximum index of grid.
 - particle_list (vector<SPH_particle>) :: List of all the particles
-- search_grid (<vector<vector<vector<SPH_particle*>>>) :: Outer two vectors are
+- search_grid (<vector<vector<vector<SPH_particle*> > >) :: Outer two vectors are
   the grid, inner vector is the list.
 
 *** Class functions:
@@ -196,6 +208,16 @@ Calculates the cubic spline according to three cases:
 - time_dynamic() (void) ::
 - full_update(/SPH_particle* part/) (void) ::
 - get_new_max(/SPH_particle* part/) (void) ::
+- repulsion(/SPH_particle* part/, /double dist/) (double) ::
+- update_particle_FE(/SPH_particle* part/) ::
+
+* Parallelization with OpenMP
+OpenMP was used to parallelize the computation of the simulation. The /#pragma omp
+for loops/ exist on the /SPH_Snippet/, parallelizing the looping over all
+particles. Since our /update_particle/ and /neighbout_iterate/ functions operate
+on two particles in the same time, the /#pragma omp atomic/ directive was added
+at the parts of the code where we update the particle values, to ensure that no
+more than one process accesses and edits them at one time.
 
 * Running the Simulation, Post-processing and Output scripts
 A sample C++ file (/SPH_Snippet.cpp/) has been provided in the package that runs
