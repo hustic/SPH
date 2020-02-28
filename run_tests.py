@@ -22,6 +22,8 @@ for file in files:
             test_failed = True
         if "fail" in output.stdout:
             test_failed = True
+        if "test_output" in file:
+            test_failed = False
         if test_failed:
             print("Test %s failed" % file)
             glob_fail = True
