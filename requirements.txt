@@ -2,3 +2,5 @@ vtk
 lxml
 pandas
 tables
+pytest
+pytest-timeout
