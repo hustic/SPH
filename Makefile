@@ -32,7 +32,7 @@ TESTS = test_SPH_2D test_file_writer test_output
 
 runtests: cleantest ${TESTS}
 	@python3 run_tests.py
-	rm -f $(TEST_DIR)/test_output*.vtp
+	# rm -f $(TEST_DIR)/test_output*.vtp
 
 tests: ${TESTS}
 
