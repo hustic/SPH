@@ -16,7 +16,7 @@ void file_out(SPH_particle* part, int ite);
 int main(void)
 {
 	//parse the input configuration file
-	ifstream myfile("./tests/test.txt");
+	ifstream myfile("./tests/test_input.txt");
 	string line;
 	double t_total, t_print, delta_x;
 	bool analyse_mode;
