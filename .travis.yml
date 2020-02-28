@@ -7,7 +7,7 @@ python:
   - "3.7"
 # Change this to your needs
 before_install:
-  - sudo apt-get install -y openmpi-bin openmpi-common libopenmpi-dev libopenmpi2 python3 python3-pip
+  - sudo apt-get install -y openmpi-bin openmpi-common libopenmpi-dev libopenmpi2 python3 python3-pip libboost-all-dev
 env:
   - OMP_NUM_THREADS=4
 script:
