@@ -43,6 +43,7 @@ The /input.txt/ should look like:
 30.0  <-- length of the simulation in seconds
 0.05  <-- time-step to output to disk
 0.2   <-- dx
+0     <-- switch off analysisMode (to be deprecated)
 -0.6 -0.6 0.1 10.7 1   <-- Define bottom left and top right corners (first 4)
 0.0 10.0 20.0 10.7 1   <-- 5th argument is the type of particle (1 for boundary)
 20.0 -0.6 20.6 10.7 1
