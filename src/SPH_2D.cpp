@@ -11,6 +11,7 @@ SPH_main::SPH_main(): grid_count(), v_max(v_max), a_max(a_max), rho_max(rho_max)
 }
 
 
+//function to calculate which grid each cell belongs to
 void SPH_particle::calc_index(void)
 {
 	for (int i = 0; i < 2; i++)
@@ -171,6 +172,7 @@ void SPH_main::density_field_smoothing(SPH_particle* part)		//performs the densi
 	}
 }
 
+// set initial parameters
 void SPH_main::set_values(double delta_x)
 {
 	min_x[0] = 0.0;
@@ -222,7 +224,7 @@ void SPH_main::initialise_grid(void)
 	}
 }
 
-
+// place particles into the grid
 void SPH_main::place_points(double min0, double min1, double max0, double max1, bool type)
 {
 	double x[2] = { min0, min1 };
@@ -342,6 +344,7 @@ void SPH_main::neighbour_iterate(SPH_particle* part)					//iterates over all par
 
 }
 
+// update the particle with half step
 void SPH_main::update_particle(SPH_particle* part) 
 {
 	if (!part->is_boundary)
@@ -353,14 +356,12 @@ void SPH_main::update_particle(SPH_particle* part)
 				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
 				#pragma omp atomic
 				part->a[k] += abs(repulsion(part, dist));
-				// cout << " acc " <<part->v[k] << endl;
 			}
 			else if(part->x[k] > max_x[k] - 3.5 * dx){
 
 				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
 				#pragma omp atomic
 				part->a[k] -= abs(repulsion(part, dist));
-				// cout << " acc " <<part->v[k] << endl;
 			}
             part->x[k] = part->x_half[k] + 0.5 * dt * part->v[k];
             part->v[k] = part->v_half[k] + 0.5 * dt * part->a[k];
@@ -384,6 +385,7 @@ void SPH_main::reset_grid_count()
 
 }
 
+// update rho for density smoothing and reset some parameters
 void SPH_main::update_rho(SPH_particle* part)
 {
 	if (part->rho2 != 0) 
@@ -395,7 +397,7 @@ void SPH_main::update_rho(SPH_particle* part)
 	part->denominator = 0.0;
 }
 
-
+// store the initial velocity density and position for second order scheme
 void SPH_main::store_initial(SPH_particle* part)
 {
 	part->rho_half = part->rho;
@@ -406,6 +408,7 @@ void SPH_main::store_initial(SPH_particle* part)
 
 }
 
+// the final update of particle for each iteration using the second order method
 void SPH_main::full_update(SPH_particle* part)
 {
 	if (!part->is_boundary)
@@ -429,7 +432,8 @@ void SPH_main::full_update(SPH_particle* part)
 	part->D = 0.0;
 }
 
-
+// Find the timestep for next iteration by finding the minimum of three other timesteps
+// calculated using the maximum velocity, density and acceleration.
 void SPH_main::time_dynamic()
 {
 	dt_cfl = (h / v_max);
@@ -461,6 +465,7 @@ void SPH_main::time_dynamic()
 	dt_cfl = 0;
 }
 
+// get the new global maximum velocity acceleration and density
 void SPH_main::get_new_max(SPH_particle* part)
 {
 	double temp_vv = 0;
@@ -476,7 +481,7 @@ void SPH_main::get_new_max(SPH_particle* part)
 	}
 }
 
-
+// calculate the repulsive force to the boundary
 double SPH_main::repulsion(SPH_particle *part, double &dist)
 {
 	double fd = pow((0.5 * dx / dist), 6) - 1.0;
@@ -485,3 +490,36 @@ double SPH_main::repulsion(SPH_particle *part, double &dist)
     return temp_a;
 }
 
+// update function for the first order method
+void SPH_main::update_particle_FE(SPH_particle* part) 
+{
+	if (!part->is_boundary)
+	{
+		for (int k = 0; k < 2; k++)
+		{
+			if (part->x[k] < min_x[k] + 3.5 * dx)
+			{
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] += abs(repulsion(part, dist));
+			}
+			else if(part->x[k] > max_x[k] - 3.5 * dx){
+
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] -= abs(repulsion(part, dist));
+			}
+            part->x[k] = part->x[k] + dt * part->v[k];
+            part->v[k] = part->v[k] + dt * part->a[k];
+		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
+	}
+
+	part->rho = part->rho + part->D * dt;
+	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+
+	part->D = 0.0;
+}
