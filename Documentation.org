@@ -31,7 +31,7 @@ the simulation.
 - D (double) :: Particle rate of change of density variable.
 - rho2 (dobule) :: Particle density variable. Used in the
   /density_field_smoothing/ function.
-- vij_half[] (double) ::
+- vij_half[] (double) :: The largest difference of velocities between one particle and any of its neighbours.
 - x_half[] (double) :: Particle half-step position variable. This is an array
   that stores the position of the particle after a half step in the second order
   time-stepping method. This array has two entries, one for the x-direction and
@@ -114,7 +114,8 @@ For dynamic time stepping
   be between 0.1 - 0.3.
 
 - min_x[], max_x[] (double) :: Dimensions of simulation region
-- grid_count (vector<vector<int>>) ::
+- grid_count (vector<vector<int>>) :: Decrements the total number of neighbour
+  particles we need to saerch through.
 - max_list[] (int) :: Maximum index of grid.
 - particle_list (vector<SPH_particle>) :: List of all the particles
 - search_grid (<vector<vector<vector<SPH_particle*> > >) :: Outer two vectors are
@@ -140,9 +141,9 @@ Calculates the cubic spline according to three cases:
 - cubic_spline_first_derivative(/double r[]/) (double) :: Cubic Spline First
   Derivative calculation function.
 
-    + /r[]/ contains the distance between two points.
+  + /r[]/ contains the distance between two points.
 
-     Calculates the cubic spline according to three cases:
+   Calculates the cubic spline according to three cases:
   \begin{equation}
   \nabla W(r, h) = \frac{10}{7\pi h^{3}} \begin{cases}
       -3 q + \frac{9}{4} q^2 & \text{ if } 0 \leq q \leq 1\\
@@ -158,12 +159,12 @@ Calculates the cubic spline according to three cases:
     for.
   + /other_part/ is a pointer to the neighbouring particle used in the calculation.
     The calculations are done according to the following functions:
- \begin{equation}
-    \alpha_i = - \sum_{j=1}^{N} m_j \Big(\frac{P_i}{\rho_i^2} + \frac{P_j}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij},h)e_{ij} + \sum_{j=1}^{N} m_j \Big( \frac{1}{\rho_i^2} + \frac{1}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij}, h) \frac{v_{ij}} {r_{ij}}
- \end{equation}
- \begin{equation}
- D_i = \sum_{j=1}^{N} m_j \frac{dW}{dr}(r_{ij}, h) v_{ij} \cdot e_{ij}
- \end{equation}
+  \begin{equation}
+     \alpha_i = - \sum_{j=1}^{N} m_j \Big(\frac{P_i}{\rho_i^2} + \frac{P_j}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij},h)e_{ij} + \sum_{j=1}^{N} m_j \Big( \frac{1}{\rho_i^2} + \frac{1}{\rho_j^2} \Big) \frac{dW}{dr}(r_{ij}, h) \frac{v_{ij}} {r_{ij}}
+  \end{equation}
+  \begin{equation}
+  D_i = \sum_{j=1}^{N} m_j \frac{dW}{dr}(r_{ij}, h) v_{ij} \cdot e_{ij}
+  \end{equation}
 - density_field_smoothing(/SPH_particle* part/) (void) :: Smoothing out the
   Density/Pressure field. This is done because the integration of the continuity
   equation will result in variations in density and pressure based on the
@@ -196,9 +197,10 @@ Calculates the cubic spline according to three cases:
   corresponding search grid cell.
 - neighbour_iterate(/SPH_particle* part/) (void) :: The main function that
   searches the search grid to find the corresponding neighbours for the given
-  particle.
+  particle. Iterates through a particle's neighbours within 2h with a stencil
+  scheme, and update the gradients for pairs of particles. This function is
+  called twice in one iteration (one per half-step).
   + /part/ the particle for which the neighbours are searched.
-  !!!NEED TO ADD DESCRIPTION!!!!
 - update_particle(/SPH_particle* part/) (void) :: Function that updates the
   position, velocity, density and pressure, according to the results of the
   /update_gradients/ functions.
@@ -212,15 +214,20 @@ Calculates the cubic spline according to three cases:
   velocity, density and position for the second order time-stepping scheme.
   + /part/ input particle to store
  
-- time_dynamic() (void) ::
-- full_update(/SPH_particle* part/) (void) :: blablabla
+- time_dynamic() (void) :: Finds the timestep for next iteration by finding the
+  minimum of three other timesteps calculated using the maximum velocity,
+  density and acceleration. This function is called in every iteration.
+- full_update(/SPH_particle* part/) (void) :: The final update of particle for
+  each iteration using the second order method.
   + /part/ particle to receive full update.
-- get_new_max(/SPH_particle* part/) (void) :: blablabla
+- get_new_max(/SPH_particle* part/) (void) :: Gets the new global maximum
+  velocity acceleration and density.
   + /part/ particle to get new max from.
-- repulsion(/SPH_particle* part/, /double dist/) (double) :: blablabla
+- repulsion(/SPH_particle* part/, /double dist/) (double) :: Calculate the
+  repulsive force to a particle by the boundary.
   + /part/ particle to apply the repulsive force to.
-  + /dist/
-- update_particle_FE(/SPH_particle* part/) ::
+  + /dist/ distance between the particle and the nearby boundary.
+- update_particle_FE(/SPH_particle* part/) :: update function for the first order method.
 
 * Parallelization with OpenMP
 OpenMP was used to parallelize the computation of the simulation. The /#pragma omp
@@ -309,3 +316,16 @@ python ./tests/test_post.py
 #+END_SRC
 (It goes without saying that the /.vtp/ files need to already exist for the
 /.h5/ files to be produced.)
+* Arbitrary Boundaries (beta)
+This is a separate scheme for arbitrary convex polygon shaped domains. To use it, substitute the relevant files in the source file with the ones under arbitrary/. It applies Forward Euler time-stepping and direct push back boundary mechanism. Its member functions are mostly the same with the original scheme, with the following differences:new attributes in the SPH_main class:
++ vector<vector<double>> boundaries, vertices, areas:
+stores information of boundaries and vertices of the domain polygon and rectangular areas containing moving particles.
++ set<vector<int>> near_boundary:
+stores the indices of grids that are near the boundary.
++ int vcount:
+the number of vertices.is_inside:
+This function decides if a boundary particle lies inside the domain polygon. It iterates through each boundaries, performs cross product on the vectors from boundary endpoints to the particle to determine which side it lies on.place_points_new:
+For boundary particles (type = 1), the first 4 arguments describe the coordinates of the two end points of a line. Boundary particles will be placed every dx on the line, and 3 more lines of particles will be placed outside, parallel to this line each at a distance of dx.
+For moving particles (type = 0), the first 4 arguments still define the
+bottom-left and top-right points of a rectangle. The particles in the rectangle
+will be placed if its inside the polygon (determined using is_inside )
