@@ -77,7 +77,8 @@ int main(void)
 	while (t < t_max)
 	{
 		cout << "t = " << t << endl;
-		// first half step
+
+		// search for the neighbours and calculate the gradient of change in density velocity and position
 		#pragma omp parallel for schedule(dynamic, 1) num_threads(2)
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
@@ -89,14 +90,19 @@ int main(void)
 				}
 			}
 		}
+		// update all the particles at once
 		#pragma omp parallel for schedule(static, 1) num_threads(2)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle_FE(&domain.particle_list[i]);
 
+        // reset the gridcount for neightbout pairing inside the same cell
 		domain.reset_grid_count();
-		
+		domain.allocate_to_grid();								//update grid index of each particle
+
+
 		if (count % 10 == 0) {
 			// cout << "Density field smoothed at iter = " << iter << endl;
+            // search for neighbours and do density smoothing every 10 iterations
             #pragma omp parallel for schedule(dynamic, 1) num_threads(2)
 			for (int j = 0; j < domain.max_list[1]; j++)
 			{
@@ -111,15 +117,18 @@ int main(void)
 		}
 		if (count % 10 == 0) 
 		{
-		#pragma omp parallel for schedule(static, 1) num_threads(2)
-		for (int i = 0; i < domain.particle_list.size(); i++)
-			domain.update_rho(&domain.particle_list[i]);
+            // update the density from density smoothing at once
+            #pragma omp parallel for schedule(static, 1) num_threads(2)
+            for (int i = 0; i < domain.particle_list.size(); i++)
+                domain.update_rho(&domain.particle_list[i]);
 		}
 
+        // calculate the search grid index for each particle
 		#pragma omp parallel for schedule(static, 1) num_threads(2)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
+        // reset the gridcount for neightbout pairing inside the same cell
 		domain.reset_grid_count();
 		domain.allocate_to_grid();								//update grid index of each particle
 		
