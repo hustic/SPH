@@ -80,8 +80,13 @@ the simulation.
   our system.
 - rho0 (double) :: Initial density variable. This variable stores the initial
   density value for all the particles.
-- B (double) ::
-- gamma (double) ::
+- B (double) :: Initial, or reference density of the fluid, given by the
+  formula:
+  \begin{equation}
+  B = \frac{\rho_o c_o^2}{\gamma}
+  \end{equation}
+- gamma (double) :: A constant used in a number of formulas throughout the code.
+  The value is given as 7.
 - mass (double) :: Mass variable. This variable stores the mass of each particle
   in the simulation.
 
@@ -203,12 +208,18 @@ Calculates the cubic spline according to three cases:
 - update_rho(/SPH_particle* part/) (void) :: This function updates the density
   of the particle after each half and whole timestep.
   + /part/ the particle for which the density is updated.
-- store_initial(/SPH_particle* part/) (void) :: eheheheh
+- store_initial(/SPH_particle* part/) (void) :: This function stores the initial
+  velocity, density and position for the second order time-stepping scheme.
+  + /part/ input particle to store
  
 - time_dynamic() (void) ::
-- full_update(/SPH_particle* part/) (void) ::
-- get_new_max(/SPH_particle* part/) (void) ::
-- repulsion(/SPH_particle* part/, /double dist/) (double) ::
+- full_update(/SPH_particle* part/) (void) :: blablabla
+  + /part/ particle to receive full update.
+- get_new_max(/SPH_particle* part/) (void) :: blablabla
+  + /part/ particle to get new max from.
+- repulsion(/SPH_particle* part/, /double dist/) (double) :: blablabla
+  + /part/ particle to apply the repulsive force to.
+  + /dist/
 - update_particle_FE(/SPH_particle* part/) ::
 
 * Parallelization with OpenMP
