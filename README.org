@@ -55,7 +55,8 @@ The /input.txt/ should look like:
 ** Documentation
 Extensive Documentation has been written for both the tool and its testing
 routines.
-You can either check the [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md][Markdown version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org][emacs org-mode version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf][pdf version]], or head over to the Github wiki :D
+You can either check the [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md][Markdown version]] (incomplete :( ),  [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org][emacs org-mode
+version]] (no latex functions unfortunately), [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf][pdf version]].
 
 ** Testing
 
