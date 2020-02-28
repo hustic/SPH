@@ -4,6 +4,8 @@
 #+OPTION: ^:nill
 #+OPTION: tex:t
 
+#+LATEX: \newpage
+
 This tool has been implemented in C++ with Python as a means to analyze data and
 test the output of the code. Bellow is the documentation of the functions used
 in the tool and an analysis of the testing pipline.
