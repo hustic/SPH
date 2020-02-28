@@ -341,14 +341,12 @@ void SPH_main::update_particle(SPH_particle* part)
 				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
 				#pragma omp atomic
 				part->a[k] += abs(repulsion(part, dist));
-				// cout << " acc " <<part->v[k] << endl;
 			}
 			else if(part->x[k] > max_x[k] - 3.5 * dx){
 
 				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
 				#pragma omp atomic
 				part->a[k] -= abs(repulsion(part, dist));
-				// cout << " acc " <<part->v[k] << endl;
 			}
             part->x[k] = part->x_half[k] + 0.5 * dt * part->v[k];
             part->v[k] = part->v_half[k] + 0.5 * dt * part->a[k];
@@ -473,3 +471,35 @@ double SPH_main::repulsion(SPH_particle *part, double &dist)
     return temp_a;
 }
 
+void SPH_main::update_particle_FE(SPH_particle* part) 
+{
+	if (!part->is_boundary)
+	{
+		for (int k = 0; k < 2; k++)
+		{
+			if (part->x[k] < min_x[k] + 3.5 * dx)
+			{
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] += abs(repulsion(part, dist));
+			}
+			else if(part->x[k] > max_x[k] - 3.5 * dx){
+
+				double dist = abs(part->x[k] - (min_x[k] + 3.0 * dx));
+				#pragma omp atomic
+				part->a[k] -= abs(repulsion(part, dist));
+			}
+            part->x[k] = part->x[k] + dt * part->v[k];
+            part->v[k] = part->v[k] + dt * part->a[k];
+		}
+		for (int n = 0; n < 2; n++)
+		{
+			part->a[n] = 0.0 + g[n];
+		}
+	}
+
+	part->rho = part->rho + part->D * dt;
+	part->P = B * (pow((part->rho / rho0), gamma) - 1);
+
+	part->D = 0.0;
+}
