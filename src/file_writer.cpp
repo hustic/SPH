@@ -33,6 +33,35 @@ std::string scalar_to_string(const char* name,
        return s;
 }
 
+std::string scalar_to_string_int(const char* name,
+    std::vector<SPH_particle>* particle_list,
+    int (*func)(SPH_particle)) {
+
+    /**
+       Return scalar variable from function func as string of named
+       VTK DataArray for particle list
+
+       @param[in] name Name of the array.
+       @param[in] particle_list The list to output.
+       @param[in] func Function to access variable
+    */
+
+    std::string s;
+
+    s += "<DataArray type=\"Int32\" Name=\"";
+    s += name;
+    s += "\" format=\"ascii\">\n";
+
+    for (auto p = particle_list->begin(); p != particle_list->end(); ++p) {
+        s += " ";
+        s += std::to_string(func(*p));
+    }
+    s += "\n";
+    s += "</DataArray>\n";
+
+    return s;
+}
+
 std::string vector_to_string(const char* name,
 			     std::vector<SPH_particle> *particle_list,
 			     double (*func)(SPH_particle, int)) {
@@ -100,10 +129,26 @@ double get_pressure(SPH_particle p) {
   /* Return pressure for particle p */
   return p.P;
 }
+double get_density(SPH_particle p) {
+    return p.rho;
+}
 
+int get_type(SPH_particle p)
+{
+    /* Return type of the particle, either boundary particle = 1 or not*/
+
+    return p.is_boundary;
+}
+
+double get_spacingDensity(SPH_particle p)
+{
+    /* Return sapace density of each partical*/
+
+    return p.rho_spacing;
+}
 
 int write_file(const char *filename,
-	       std::vector<SPH_particle> *particle_list) {
+	       std::vector<SPH_particle> *particle_list, bool analysisMode) {
 
   /*
     
@@ -122,6 +167,9 @@ int write_file(const char *filename,
   fs << "<PointData>\n";
   fs << scalar_to_string("Pressure", particle_list, get_pressure);
   fs << vector_to_string("Velocity", particle_list, get_velocity);
+  fs << scalar_to_string_int("Type", particle_list, get_type);
+  fs << scalar_to_string("Density", particle_list, get_density);
+  if (analysisMode) fs << scalar_to_string("SpacingDensity", particle_list, get_spacingDensity);
   fs << "</PointData>\n";
   fs << "<Points>\n";
   fs << vector_to_string("Points", particle_list, get_position);

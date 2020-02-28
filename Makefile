@@ -1,6 +1,6 @@
-CXX = g++
+CXX = g++ -lpthread -fopenmp -O3
 CXXFLAGS = -Wall -std=c++17
-LDFLAGS =
+LDFLAGS = 
 SOURCE_DIR = src
 INCLUDE_DIR = includes
 TEST_DIR = tests
@@ -28,10 +28,11 @@ clean:
 
 .PHONY: SPH_2D all clean
 
-TESTS = test_SPH_2D test_file_writer
+TESTS = test_SPH_2D test_file_writer test_output
 
 runtests: cleantest ${TESTS}
 	@python3 run_tests.py
+	rm -f $(TEST_DIR)/test_output*.vtp
 
 tests: ${TESTS}
 
@@ -39,17 +40,22 @@ test_SPH_2D: $(TEST_BIN_DIR)/test_SPH_2D
 
 test_file_writer: $(TEST_BIN_DIR)/test_file_writer
 
+test_output: $(TEST_BIN_DIR)/test_output
+
 $(TEST_BIN_DIR)/test_SPH_2D: $(TEST_BUILD_DIR)/test_SPH_2D.o $(BUILD_DIR)/SPH_2D.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 $(TEST_BIN_DIR)/test_file_writer: $(TEST_BUILD_DIR)/test_file_writer.o $(BUILD_DIR)/file_writer.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
+$(TEST_BIN_DIR)/test_output: $(TEST_BUILD_DIR)/test_output.o $(BUILD_DIR)/SPH_2D.o $(BUILD_DIR)/file_writer.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
+
 $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.cpp $(INCLUDE_DIR)/*.h | test_directories
 	$(CXX) -o $@ -c $< $(CXXFLAGS) $(CPPFLAGS) -I$(INCLUDE_DIR)
 
 cleantest:
-	rm -f $(TEST_BUILD_DIR)/* $(TEST_BIN_DIR)/* $(TEST_DIR)/*.vtp
+	rm -f $(TEST_BUILD_DIR)/* $(TEST_BIN_DIR)/* $(TEST_DIR)/*.vtp $(TEST_DIR)/*.h5
 
 .PHONY: tests ${TESTS} cleantests runtests
 

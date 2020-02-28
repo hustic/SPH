@@ -1,0 +1,57 @@
+#+TITLE: README
+
+* ACSE-4-SPH
+
+[[https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics][Smoothed Particle Hydrodynamics]] (SPH) is a meshless
+method for solving the Navier-Stokes equation, in which fluid properties are stored on Lagrangian fluid particles (i.e. on
+particles which move with the fluid flow). The particles interact to generate values across the entire fluid domain through
+continuous smoothing kernels.
+
+As the SPH method is meshless and Lagrangian, it is ideal for solving problems involving fluid flow with interfaces and free
+surfaces. This tool implements the SPH method in C++ to solve wave generation in a lock-release/dam-break problem.
+
+** Compilation/Installation Guide
+A Makefile has been provided that builds the tool and places the executables in
+the /bin/ folder. Reading through the Makefile is highly encouraged to see all
+the options a user has for building and testing the tool. The simplest way to
+compile is:
+#+BEGIN_SRC bash
+make
+#+END_SRC
+
+Note, that the /post.py/ uses the /lxlm/ library. The installation of that
+library changes from system to system. Users are thus encouraged to check out
+the [[https://lxml.de/installation.html][installation page on the lxlm website]].
+
+Also note, that the testing routines use the BOOST library, which is another can
+of worms. If you are using a Linux distribution (however) you can just use /apt-get/:
+
+#+BEGIN_SRC bash
+sudo apt-get install libboost-all-dev
+#+END_SRC
+, or any other package manager your distribution comes with.
+
+** User instructions
+
+*To be written*
+
+** Documentation
+Extensive Documentation has been written for both the tool and its testing
+routines.
+You can either check the [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.md][Markdown version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.org][emacs org-mode version]], [[https://github.com/acse-2019/acse-4-sph-ness/blob/master/Documentation.pdf][pdf version]], or head over to the Github wiki :D
+
+** Testing
+
+The tool includes tests, which you can use to check its operation on your system. With the code compiled, these can be run
+with
+
+#+BEGIN_SRC bash
+python run_tests.py
+#+END_SRC
+
+If you are on a Linux distribution and you want to compile and run the complete
+testing routines, you can use:
+
+#+BEGIN_SRC bash
+make runtests
+#+END_SRC

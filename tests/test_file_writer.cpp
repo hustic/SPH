@@ -18,7 +18,7 @@ int main() {
 
   if (particle_list.size() != 10) return 1;
 
-  return write_file("tests/test_file_writer.vtp", &particle_list);
+  return write_file("tests/test_file_writer.vtp", &particle_list, false);
 
 }
 
