@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <omp.h>
 
 using namespace std;
 
@@ -65,7 +66,7 @@ int main(void)
 	domain.allocate_to_grid();
 
 	stringstream name;
-	name << "./tests/test_output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";
+	name << "test_output" << "_" << setfill('0') << setw(int(to_string(100).length())) << 0 << ".vtp";		
 	write_file(name.str().c_str(), &domain.particle_list, domain.analysisMode);
 
 	double t_max = t_total;
@@ -76,8 +77,9 @@ int main(void)
 
 	while (t < t_max)
 	{
-		//cout << "t = " << t << endl;
+		// cout << "t = " << t << endl;
 		// first half step
+		#pragma omp parallel for schedule(dynamic, 1) num_threads(6)
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
 			for (int i = 0; i < domain.max_list[0]; i++)
@@ -89,17 +91,20 @@ int main(void)
 				}
 			}
 		}
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.update_particle(&domain.particle_list[i]);
 
 		domain.reset_grid_count();
 
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
 		domain.allocate_to_grid();								//update grid index of each particle
-
+		
 		// first full step
+		#pragma omp parallel for schedule(dynamic, 1) num_threads(4)
 		for (int j = 0; j < domain.max_list[1]; j++)
 		{
 			for (int i = 0; i < domain.max_list[0]; i++)
@@ -112,21 +117,23 @@ int main(void)
 		}
 
 		// last full step
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 		{
 			domain.update_particle(&domain.particle_list[i]);
 			domain.full_update(&domain.particle_list[i]);
 
 		}
-
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.particle_list[i].calc_index();
 
 		domain.allocate_to_grid();								//update grid index of each particle
 		domain.reset_grid_count();
-
+		
 		if (count % 10 == 0) {
 			// cout << "Density field smoothed at iter = " << iter << endl;
+			#pragma omp parallel for schedule(dynamic, 1) num_threads(4)
 			for (int j = 0; j < domain.max_list[1]; j++)
 			{
 				for (int i = 0; i < domain.max_list[0]; i++)
@@ -138,14 +145,16 @@ int main(void)
 				}
 			}
 		}
-		if (count % 10 == 0)
+		if (count % 10 == 0) 
 		{
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 			for (int i = 0; i < domain.particle_list.size(); i++)
 				domain.update_rho(&domain.particle_list[i]);
 		}
 		domain.reset_grid_count();
-
+		
 		// get the max for minimum dynamic time step
+		#pragma omp parallel for schedule(static, 1) num_threads(4)
 		for (int i = 0; i < domain.particle_list.size(); i++)
 			domain.get_new_max(&domain.particle_list[i]);
 
@@ -156,13 +165,13 @@ int main(void)
 		if (dt_print >= t_print)
 		{
 			stringstream name;
-			name << "./tests/test_output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/0.1) << ".vtp";
+			name << "test_output" << "_" << setfill('0') << setw(int(to_string(100).length())) << (int)(t/t_print) << ".vtp";		
 			write_file(name.str().c_str(), &domain.particle_list, domain.analysisMode);
 			dt_print = 0;
 		}
 		t += domain.dt;
 		count++;
 	}
-
+	
 	return 0;
 }
